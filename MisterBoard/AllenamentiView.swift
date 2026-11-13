@@ -11,19 +11,29 @@ import SwiftData
 struct AllenamentiView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Allenamento.dataOra, order: .reverse) private var allenamenti: [Allenamento]
+    @State private var mostraConfermaCancellaTutto = false
     
     var body: some View {
         NavigationStack {
             List {
-                BoardSummaryCard(title: "Si cresce insieme", subtitle: "Sessioni di lavoro della squadra", symbol: "figure.run", color: BoardPalette.allenamenti, count: allenamenti.count)
+                BoardSummaryCard(
+                    title: "I tuoi allenamenti",
+                    subtitle: "Sessioni di lavoro della squadra",
+                    symbol: "figure.run",
+                    color: BoardPalette.allenamenti,
+                    count: allenamenti.count
+                )
+                
                 ForEach(allenamenti) { allenamento in
                     NavigationLink(destination: DettaglioAllenamentoView(allenamento: allenamento)) {
                         VStack(alignment: .leading, spacing: 12) {
                             Label("ALLENAMENTO", systemImage: "figure.run")
                                 .font(.caption.weight(.bold))
                                 .foregroundStyle(.secondary)
+                            
                             Text(allenamento.dataOra.formatted(date: .abbreviated, time: .shortened))
                                 .font(.headline)
+                            
                             HStack {
                                 Text(allenamento.note.isEmpty ? "Sessione ordinaria" : allenamento.note)
                                 Spacer()
@@ -40,21 +50,57 @@ struct AllenamentiView: View {
                 .boardCardRow(BoardPalette.allenamenti)
             }
             .boardList(BoardPalette.allenamenti)
-            .navigationTitle("Allenamenti")
+            //.navigationTitle("Allenamenti")
             .toolbar {
-                Button {
-                    let nuovo = Allenamento(dataOra: .now)
-                    modelContext.insert(nuovo)
-                } label: {
-                    Image(systemName: "plus")
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(role: .destructive) {
+                        mostraConfermaCancellaTutto = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "trash")
+                            Text("Elimina tutto")
+                        }
+                        .font(.caption.weight(.semibold))
+                    }
+                    .disabled(allenamenti.isEmpty)
+                    .accessibilityLabel("Cancella tutti gli allenamenti")
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        let nuovo = Allenamento(dataOra: .now)
+                        modelContext.insert(nuovo)
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus")
+                            Text("Nuovo allenamento")
+                        }
+                        .font(.caption.weight(.semibold))
+                    }
+                    .accessibilityLabel("Nuovo allenamento")
                 }
             }
+            .alert("Eliminare tutti gli allenamenti?", isPresented: $mostraConfermaCancellaTutto) {
+                Button("Annulla", role: .cancel) {}
+                Button("Elimina tutto", role: .destructive) {
+                    cancellaTuttiGliAllenamenti()
+                }
+            } message: {
+                Text("Stai per cancellare TUTTI gli allenamenti. L'operazione non può essere annullata.")
+            }
         }
+
     }
     
     private func eliminaAllenamenti(offsets: IndexSet) {
         for index in offsets {
             modelContext.delete(allenamenti[index])
+        }
+    }
+
+    private func cancellaTuttiGliAllenamenti() {
+        for allenamento in allenamenti {
+            modelContext.delete(allenamento)
         }
     }
 }
@@ -127,3 +173,4 @@ struct DettaglioAllenamentoView: View {
         }
     }
 }
+

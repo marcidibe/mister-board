@@ -7,11 +7,11 @@
 
 // TODO:
     // 1 - ridurre dimensione card nomi giocatori
-    // 2 - button cancella tutto con alert su allenamenti e partite
+    // 2 - button cancella tutto con alert su allenamenti e partite --> FATTO
     // 3 - quando la partira è in casa, non deve comparire Ritrovo nell'export
     // 4 - il tasto di import lista deve essere parlante e anche il + deve essere parlante (Aggiungi Giocatori, etc. etc.)
     // 5 - aggiungere guida dettagliata per utilizzo
-    // 6- creare video e banner
+    // 6 - creare video e banner
 
 import SwiftUI
 import SwiftData

@@ -11,11 +11,19 @@ import SwiftData
 struct PartiteView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Partita.dataOra, order: .reverse) private var partite: [Partita]
+    @State private var mostraConfermaCancellaTutto = false
     
     var body: some View {
         NavigationStack {
             List {
-                BoardSummaryCard(title: "Giorno di partita", subtitle: "Il prossimo obiettivo inizia qui", symbol: "sportscourt.fill", color: BoardPalette.partite, count: partite.count)
+                BoardSummaryCard(
+                    title: "Le tue convocazioni",
+                    subtitle: "Tutto inizia qui",
+                    symbol: "sportscourt.fill",
+                    color: BoardPalette.partite,
+                    count: partite.count
+                )
+                
                 ForEach(partite) { partita in
                     NavigationLink(destination: DettaglioPartitaView(partita: partita)) {
                         VStack(alignment: .leading, spacing: 6) {
@@ -56,15 +64,45 @@ struct PartiteView: View {
                 .boardCardRow(BoardPalette.partite)
             }
             .boardList(BoardPalette.partite)
-            .navigationTitle("Convocazioni")
+            //.navigationTitle("Convocazioni")
             .toolbar {
-                Button {
-                    creaNuovaPartita()
-                } label: {
-                    Image(systemName: "plus")
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(role: .destructive) {
+                        mostraConfermaCancellaTutto = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "trash")
+                            Text("Elimina tutto")
+                        }
+                        .font(.caption.weight(.semibold))
+                    }
+                    .disabled(partite.isEmpty)
+                    .accessibilityLabel("Cancella tutte le partite")
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        creaNuovaPartita()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus")
+                            Text("Nuova partita")
+                        }
+                        .font(.caption.weight(.semibold))
+                    }
+                    .accessibilityLabel("Nuova partita")
                 }
             }
+            .alert("Eliminare tutte le partite?", isPresented: $mostraConfermaCancellaTutto) {
+                Button("Annulla", role: .cancel) {}
+                Button("Elimina tutto", role: .destructive) {
+                    cancellaTutteLePartite()
+                }
+            } message: {
+                Text("Stai per cancellare TUTTE le partite. L'operazione non può essere annullata.")
+            }
         }
+
     }
     
     private func creaNuovaPartita() {
@@ -75,6 +113,12 @@ struct PartiteView: View {
     private func eliminaPartite(offsets: IndexSet) {
         for index in offsets {
             modelContext.delete(partite[index])
+        }
+    }
+
+    private func cancellaTutteLePartite() {
+        for partita in partite {
+            modelContext.delete(partita)
         }
     }
 }
@@ -150,7 +194,10 @@ struct DettaglioPartitaView: View {
                     preparaMessaggio()
                     mostraAnteprimaCondivisione = true
                 } label: {
-                    Label("Prepara messaggio", systemImage: "square.and.arrow.up")
+                    HStack(spacing: 6) {
+                        Image(systemName: "square.and.arrow.up")
+                        Text("Prepara messaggio")
+                    }
                 }
             }
         }
@@ -235,3 +282,4 @@ struct DettaglioPartitaView: View {
         }
     }
 }
+

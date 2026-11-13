@@ -24,6 +24,13 @@ struct RosaView: View {
     @State private var giocatoreInModifica: Giocatore?
     @State private var nomeModifica = ""
     @State private var cognomeModifica = ""
+    @State private var mostraConfermaCancellaTutto = false
+
+    private func cancellaTuttiIGiocatori() {
+        for giocatore in rosa {
+            modelContext.delete(giocatore)
+        }
+    }
     
     private var rosaFiltrata: [Giocatore] {
         let query = testoRicerca.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -38,19 +45,30 @@ struct RosaView: View {
     var body: some View {
         NavigationStack {
             List {
-                BoardSummaryCard(title: "La tua squadra", subtitle: "Giocatori pronti a scendere in campo", symbol: "person.3.fill", color: BoardPalette.rosa, count: rosa.count)
+                BoardSummaryCard(
+                    title: "La tua Rosa",
+                    subtitle: "Atleti a disposizione",
+                    symbol: "person.3.fill",
+                    color: BoardPalette.rosa,
+                    count: rosa.count
+                )
+                
                 ForEach(rosaFiltrata) { giocatore in
                     Button {
                         apriModifica(per: giocatore)
                     } label: {
-                        HStack(spacing: 14) {
+                        HStack(spacing: 10) {
                             BoardIcon(symbol: "person.fill", color: BoardPalette.rosa)
+                                .padding(.trailing, 2)
                             Text(giocatore.nomeCompleto)
-                                .font(.headline)
+                                .font(.subheadline)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                                .truncationMode(.tail)
                                 .foregroundStyle(.primary)
                             Spacer()
                             Image(systemName: "pencil")
-                                .font(.caption)
+                                .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -59,28 +77,54 @@ struct RosaView: View {
                 .boardCardRow(BoardPalette.rosa)
             }
             .boardList(BoardPalette.rosa)
-            .navigationTitle("Rosa")
-            .searchable(text: $testoRicerca, prompt: "Cerca per nome o cognome")
-            .overlay {
-                if rosaFiltrata.isEmpty && !testoRicerca.isEmpty {
-                    ContentUnavailableView.search(text: testoRicerca)
-                }
-            }
+            //.navigationTitle("Rosa")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        mostraImportazione = true
+                    Menu {
+                        Button {
+                            mostraImportazione = true
+                        } label: {
+                            Label("Importa una lista", systemImage: "doc.on.clipboard")
+                        }
+                        
+                        if !rosa.isEmpty {
+                            Divider()
+                            Button(role: .destructive) {
+                                mostraConfermaCancellaTutto = true
+                            } label: {
+                                Label("Cancella tutta la rosa", systemImage: "trash")
+                            }
+                        }
                     } label: {
-                        Label("Importa lista", systemImage: "doc.on.clipboard")
+                        HStack(spacing: 4) {
+                            Image(systemName: "ellipsis.circle")
+                            Text("Gestisci")
+                        }
+                        .font(.caption.weight(.semibold))
                     }
+                    .accessibilityLabel("Gestisci lista giocatori")
                 }
+                
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         mostraAggiuntaSingola = true
                     } label: {
-                        Image(systemName: "plus")
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus")
+                            Text("Nuovo giocatore")
+                        }
+                        .font(.caption.weight(.semibold))
                     }
+                    .accessibilityLabel("Aggiungi giocatore")
                 }
+            }
+            .alert("Eliminare tutta la rosa?", isPresented: $mostraConfermaCancellaTutto) {
+                Button("Annulla", role: .cancel) {}
+                Button("Elimina tutto", role: .destructive) {
+                    cancellaTuttiIGiocatori()
+                }
+            } message: {
+                Text("Stai per cancellare TUTTI i giocatori della rosa. L'operazione non può essere annullata.")
             }
             .alert("Nuovo Giocatore", isPresented: $mostraAggiuntaSingola) {
                 TextField("Nome", text: $nome)
@@ -114,7 +158,7 @@ struct RosaView: View {
             .sheet(isPresented: $mostraImportazione) {
                 NavigationStack {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Incolla un giocatore per riga nel formato NOME COGNOME: due parole di sole lettere separate da un solo spazio. Il testo verrà convertito in maiuscolo.")
+                        Text("Incolla la lista giocatori, per riga, nel formato NOME COGNOME: due parole di sole lettere separate da un solo spazio.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                         
@@ -159,6 +203,8 @@ struct RosaView: View {
             cognomeModifica = TestoAnagrafico.normalizza(valore)
         }
     }
+
+
     
     private func apriModifica(per giocatore: Giocatore) {
         nomeModifica = giocatore.nome
@@ -213,3 +259,4 @@ struct RosaView: View {
         cognome = ""
     }
 }
+

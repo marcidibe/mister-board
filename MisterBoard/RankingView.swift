@@ -42,7 +42,7 @@ struct RankingView: View {
                 }
             }
             .boardList(BoardPalette.ranking)
-            .navigationTitle("Ranking Squadra")
+            //.navigationTitle("Ranking Squadra")
         }
     }
 }
@@ -55,17 +55,20 @@ private struct RankingCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 12) {
+            HStack(spacing: 8) {
                 Text(posizione, format: .number)
                     .font(.system(.title2, design: .rounded, weight: .bold))
-                    .padding(12)
-                    .background(BoardPalette.ranking.opacity(0.12), in: RoundedRectangle(cornerRadius: 14))
+                    .padding(10)
+                    .background(BoardPalette.ranking.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
                 Text(nome)
-                    .font(.headline)
+                    .font(.subheadline)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                    .truncationMode(.tail)
                 Spacer(minLength: 4)
                 VStack(alignment: .trailing, spacing: 4) {
                     Text("\(conteggio) / \(totale)")
-                        .fontWeight(.semibold)
+                        .font(.subheadline.weight(.semibold))
                     Text("\(totale > 0 ? Int(Double(conteggio) / Double(totale) * 100) : 0)%")
                         .font(.caption)
                         .foregroundStyle(.secondary)
