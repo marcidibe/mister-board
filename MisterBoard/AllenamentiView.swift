@@ -15,9 +15,13 @@ struct AllenamentiView: View {
     var body: some View {
         NavigationStack {
             List {
+                BoardSummaryCard(title: "Si cresce insieme", subtitle: "Sessioni di lavoro della squadra", symbol: "figure.run", color: BoardPalette.allenamenti, count: allenamenti.count)
                 ForEach(allenamenti) { allenamento in
                     NavigationLink(destination: DettaglioAllenamentoView(allenamento: allenamento)) {
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Label("ALLENAMENTO", systemImage: "figure.run")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(.secondary)
                             Text(allenamento.dataOra.formatted(date: .abbreviated, time: .shortened))
                                 .font(.headline)
                             HStack {
@@ -33,7 +37,9 @@ struct AllenamentiView: View {
                     }
                 }
                 .onDelete(perform: eliminaAllenamenti)
+                .boardCardRow(BoardPalette.allenamenti)
             }
+            .boardList(BoardPalette.allenamenti)
             .navigationTitle("Allenamenti")
             .toolbar {
                 Button {
@@ -97,6 +103,7 @@ struct DettaglioAllenamentoView: View {
                 }
             }
         }
+        .boardList(BoardPalette.allenamenti)
         .navigationTitle("Presenze Allenamento")
     }
     

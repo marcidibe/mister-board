@@ -15,10 +15,12 @@ struct PartiteView: View {
     var body: some View {
         NavigationStack {
             List {
+                BoardSummaryCard(title: "Giorno di partita", subtitle: "Il prossimo obiettivo inizia qui", symbol: "sportscourt.fill", color: BoardPalette.partite, count: partite.count)
                 ForEach(partite) { partita in
                     NavigationLink(destination: DettaglioPartitaView(partita: partita)) {
                         VStack(alignment: .leading, spacing: 6) {
                             HStack {
+                                BoardIcon(symbol: "sportscourt.fill", color: BoardPalette.partite)
                                 Text(partita.tipo.titolo)
                                     .font(.headline)
                                 Spacer()
@@ -51,7 +53,9 @@ struct PartiteView: View {
                     }
                 }
                 .onDelete(perform: eliminaPartite)
+                .boardCardRow(BoardPalette.partite)
             }
+            .boardList(BoardPalette.partite)
             .navigationTitle("Convocazioni")
             .toolbar {
                 Button {
@@ -138,6 +142,7 @@ struct DettaglioPartitaView: View {
                 }
             }
         }
+        .boardList(BoardPalette.partite)
         .navigationTitle("Dettaglio Partita")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

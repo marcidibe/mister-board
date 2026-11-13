@@ -38,12 +38,15 @@ struct RosaView: View {
     var body: some View {
         NavigationStack {
             List {
+                BoardSummaryCard(title: "La tua squadra", subtitle: "Giocatori pronti a scendere in campo", symbol: "person.3.fill", color: BoardPalette.rosa, count: rosa.count)
                 ForEach(rosaFiltrata) { giocatore in
                     Button {
                         apriModifica(per: giocatore)
                     } label: {
-                        HStack {
+                        HStack(spacing: 14) {
+                            BoardIcon(symbol: "person.fill", color: BoardPalette.rosa)
                             Text(giocatore.nomeCompleto)
+                                .font(.headline)
                                 .foregroundStyle(.primary)
                             Spacer()
                             Image(systemName: "pencil")
@@ -53,8 +56,10 @@ struct RosaView: View {
                     }
                 }
                 .onDelete(perform: eliminaGiocatori)
+                .boardCardRow(BoardPalette.rosa)
             }
-            .navigationTitle("Rosa (\(rosa.count))")
+            .boardList(BoardPalette.rosa)
+            .navigationTitle("Rosa")
             .searchable(text: $testoRicerca, prompt: "Cerca per nome o cognome")
             .overlay {
                 if rosaFiltrata.isEmpty && !testoRicerca.isEmpty {
