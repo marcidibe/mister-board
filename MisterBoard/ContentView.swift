@@ -5,6 +5,14 @@
 //  Created by Marcello Di Benedetto on 13/11/2026.
 //
 
+// TODO:
+    // 1 - ridurre dimensione card nomi giocatori
+    // 2 - button cancella tutto con alert su allenamenti e partite
+    // 3 - quando la partira è in casa, non deve comparire Ritrovo nell'export
+    // 4 - il tasto di import lista deve essere parlante e anche il + deve essere parlante (Aggiungi Giocatori, etc. etc.)
+    // 5 - aggiungere guida dettagliata per utilizzo
+    // 6- creare video e banner
+
 import SwiftUI
 import SwiftData
 
