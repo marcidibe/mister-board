@@ -8,6 +8,34 @@
 import Foundation
 import SwiftData
 
+enum TestoAnagrafico {
+    // Valida tutta la lista prima di creare oggetti SwiftData.
+    static func validaLista(_ testo: String) -> [(nome: String, cognome: String)]? {
+        let lista = testo.uppercased()
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
+            .trimmingCharacters(in: .newlines)
+        guard !lista.isEmpty else { return nil }
+
+        var giocatori: [(nome: String, cognome: String)] = []
+        for riga in lista.components(separatedBy: "\n") {
+            let parti = riga.split(separator: " ", omittingEmptySubsequences: false)
+            guard parti.count == 2,
+                  parti.allSatisfy({ !$0.isEmpty && $0.allSatisfy(\.isLetter) }) else {
+                return nil
+            }
+            giocatori.append((nome: String(parti[0]), cognome: String(parti[1])))
+        }
+        return giocatori
+    }
+
+    static func normalizza(_ testo: String) -> String {
+        testo.uppercased().filter { carattere in
+            carattere.isLetter || carattere == " "
+        }
+    }
+}
+
 @Model
 final class Giocatore {
     var nome: String
@@ -27,12 +55,32 @@ final class Giocatore {
     }
 }
 
+enum TipoPartita: String {
+    case torneo
+    case amichevole
+    case campionato
+
+    var titolo: LocalizedStringResource {
+        switch self {
+        case .torneo: "TORNEO"
+        case .amichevole: "AMICHEVOLE"
+        case .campionato: "CAMPIONATO"
+        }
+    }
+}
+
 @Model
 final class Partita {
     var dataOra: Date
     var avversario: String // Opzionale: utile per distinguere le partite nello storico
     var inCasa: Bool = true
     var luogo: String = ""
+    private var tipoRawValue: String = "torneo"
+
+    var tipo: TipoPartita {
+        get { TipoPartita(rawValue: tipoRawValue) ?? .torneo }
+        set { tipoRawValue = newValue.rawValue }
+    }
     
     @Relationship(inverse: \Giocatore.partiteConvocate)
     var convocati: [Giocatore] = []

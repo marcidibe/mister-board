@@ -19,7 +19,7 @@ struct PartiteView: View {
                     NavigationLink(destination: DettaglioPartitaView(partita: partita)) {
                         VStack(alignment: .leading, spacing: 6) {
                             HStack {
-                                Text(partita.avversario.isEmpty ? "Partita" : partita.avversario)
+                                Text(partita.tipo.titolo)
                                     .font(.headline)
                                 Spacer()
                                 Text(partita.inCasa ? "CASA" : "FUORI CASA")
@@ -64,7 +64,7 @@ struct PartiteView: View {
     }
     
     private func creaNuovaPartita() {
-        let nuova = Partita(dataOra: .now, avversario: "Nuova Partita", inCasa: true, luogo: "")
+        let nuova = Partita(dataOra: .now, inCasa: true, luogo: "")
         modelContext.insert(nuova)
     }
     
@@ -89,7 +89,13 @@ struct DettaglioPartitaView: View {
     var body: some View {
         Form {
             Section("Dettagli Partita") {
-                TextField("Avversario / Torneo", text: $partita.avversario)
+                Picker("Tipo di partita", selection: $partita.tipo) {
+                    Text("TORNEO").tag(TipoPartita.torneo)
+                    Text("AMICHEVOLE").tag(TipoPartita.amichevole)
+                    Text("CAMPIONATO").tag(TipoPartita.campionato)
+                }
+                .pickerStyle(.menu)
+
                 DatePicker("Data e Ora", selection: $partita.dataOra)
                 
                 Picker("Dove si gioca", selection: $partita.inCasa.animation()) {
@@ -180,7 +186,7 @@ struct DettaglioPartitaView: View {
         let dataFormattata = partita.dataOra.formatted(date: .long, time: .shortened)
         let ordinati = partita.convocati.sorted { $0.cognome < $1.cognome }
         
-        var testo = "⚽️ *CONVOCAZIONI: \(partita.avversario.uppercased())*\n"
+        var testo = "⚽️ *CONVOCAZIONI: \(String(localized: partita.tipo.titolo))*\n"
         testo += "📅 \(dataFormattata)\n"
         
         if partita.inCasa {

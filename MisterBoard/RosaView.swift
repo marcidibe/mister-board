@@ -19,6 +19,7 @@ struct RosaView: View {
     @State private var nome = ""
     @State private var cognome = ""
     @State private var testoImportazione = ""
+    @State private var mostraErroreImportazione = false
     
     @State private var giocatoreInModifica: Giocatore?
     @State private var nomeModifica = ""
@@ -78,7 +79,11 @@ struct RosaView: View {
             }
             .alert("Nuovo Giocatore", isPresented: $mostraAggiuntaSingola) {
                 TextField("Nome", text: $nome)
+                    .textInputAutocapitalization(.characters)
+                    .autocorrectionDisabled()
                 TextField("Cognome", text: $cognome)
+                    .textInputAutocapitalization(.characters)
+                    .autocorrectionDisabled()
                 Button("Annulla", role: .cancel) { resetCampi() }
                 Button("Aggiungi") {
                     aggiungiSingolo()
@@ -89,7 +94,11 @@ struct RosaView: View {
                 set: { if !$0 { giocatoreInModifica = nil } }
             )) {
                 TextField("Nome", text: $nomeModifica)
+                    .textInputAutocapitalization(.characters)
+                    .autocorrectionDisabled()
                 TextField("Cognome", text: $cognomeModifica)
+                    .textInputAutocapitalization(.characters)
+                    .autocorrectionDisabled()
                 Button("Annulla", role: .cancel) {
                     giocatoreInModifica = nil
                 }
@@ -100,7 +109,7 @@ struct RosaView: View {
             .sheet(isPresented: $mostraImportazione) {
                 NavigationStack {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Incolla qui l'elenco dei giocatori (uno per riga, formato: Nome Cognome):")
+                        Text("Incolla un giocatore per riga nel formato NOME COGNOME: due parole di sole lettere separate da un solo spazio. Il testo verrà convertito in maiuscolo.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                         
@@ -120,13 +129,29 @@ struct RosaView: View {
                         ToolbarItem(placement: .confirmationAction) {
                             Button("Importa") {
                                 importaDaTesto()
-                                mostraImportazione = false
                             }
                             .disabled(testoImportazione.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                         }
                     }
                 }
+                .alert("Lista non valida", isPresented: $mostraErroreImportazione) {
+                    Button("OK", role: .cancel) {}
+                } message: {
+                    Text("La lista caricata non rispetta le regole richieste. Inserisci un giocatore per riga nel formato NOME COGNOME: due parole di sole lettere separate da un solo spazio, senza numeri, simboli o righe vuote. Nessun giocatore è stato importato.")
+                }
             }
+        }
+        .onChange(of: nome) { _, valore in
+            nome = TestoAnagrafico.normalizza(valore)
+        }
+        .onChange(of: cognome) { _, valore in
+            cognome = TestoAnagrafico.normalizza(valore)
+        }
+        .onChange(of: nomeModifica) { _, valore in
+            nomeModifica = TestoAnagrafico.normalizza(valore)
+        }
+        .onChange(of: cognomeModifica) { _, valore in
+            cognomeModifica = TestoAnagrafico.normalizza(valore)
         }
     }
     
@@ -138,8 +163,8 @@ struct RosaView: View {
     
     private func salvaModifica() {
         guard let giocatore = giocatoreInModifica else { return }
-        let n = nomeModifica.trimmingCharacters(in: .whitespaces)
-        let c = cognomeModifica.trimmingCharacters(in: .whitespaces)
+        let n = TestoAnagrafico.normalizza(nomeModifica).trimmingCharacters(in: .whitespaces)
+        let c = TestoAnagrafico.normalizza(cognomeModifica).trimmingCharacters(in: .whitespaces)
         if !n.isEmpty || !c.isEmpty {
             giocatore.nome = n
             giocatore.cognome = c
@@ -148,8 +173,8 @@ struct RosaView: View {
     }
     
     private func aggiungiSingolo() {
-        let n = nome.trimmingCharacters(in: .whitespaces)
-        let c = cognome.trimmingCharacters(in: .whitespaces)
+        let n = TestoAnagrafico.normalizza(nome).trimmingCharacters(in: .whitespaces)
+        let c = TestoAnagrafico.normalizza(cognome).trimmingCharacters(in: .whitespaces)
         guard !n.isEmpty || !c.isEmpty else { return }
         
         let nuovo = Giocatore(nome: n, cognome: c)
@@ -158,18 +183,17 @@ struct RosaView: View {
     }
     
     private func importaDaTesto() {
-        let righe = testoImportazione.components(separatedBy: .newlines)
-        for riga in righe {
-            let pulita = riga.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !pulita.isEmpty else { continue }
-            
-            let parti = pulita.split(separator: " ", maxSplits: 1)
-            let nomeEstratto = String(parti[0])
-            let cognomeEstratto = parti.count > 1 ? String(parti[1]) : ""
-            
-            modelContext.insert(Giocatore(nome: nomeEstratto, cognome: cognomeEstratto))
+        testoImportazione = testoImportazione.uppercased()
+        guard let giocatori = TestoAnagrafico.validaLista(testoImportazione) else {
+            mostraErroreImportazione = true
+            return
+        }
+
+        for giocatore in giocatori {
+            modelContext.insert(Giocatore(nome: giocatore.nome, cognome: giocatore.cognome))
         }
         testoImportazione = ""
+        mostraImportazione = false
     }
     
     private func eliminaGiocatori(offsets: IndexSet) {
