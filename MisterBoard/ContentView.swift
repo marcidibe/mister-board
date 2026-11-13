@@ -7,11 +7,12 @@
 
 // TODO:
     // 1 - ridurre dimensione card nomi giocatori
-    // 2 - button cancella tutto con alert su allenamenti e partite --> FATTO
+    // ** 2 - button cancella tutto con alert su allenamenti e partite --> FATTO **
     // 3 - quando la partira è in casa, non deve comparire Ritrovo nell'export
-    // 4 - il tasto di import lista deve essere parlante e anche il + deve essere parlante (Aggiungi Giocatori, etc. etc.)
-    // 5 - aggiungere guida dettagliata per utilizzo
+    // 4 - non funziona export
+    // ** 5 - aggiungere guida dettagliata per utilizzo --> FATTO **
     // 6 - creare video e banner
+    // 7 - creare suggerimenti
 
 import SwiftUI
 import SwiftData
@@ -19,6 +20,10 @@ import SwiftData
 struct ContentView: View {
     var body: some View {
         TabView {
+            HelpView()
+                .tabItem {
+                    Label("Info", systemImage: "info.circle")
+                }
             RosaView()
                 .tabItem {
                     Label("Rosa", systemImage: "person.3.fill")
