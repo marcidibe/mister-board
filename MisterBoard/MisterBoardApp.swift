@@ -12,7 +12,9 @@ import SwiftData
 struct MisterBoardApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Giocatore.self,
+            Partita.self,
+            Allenamento.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
