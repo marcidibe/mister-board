@@ -72,7 +72,7 @@ struct PartiteView: View {
                             }
                             
                             HStack {
-                                Text(partita.dataOra.formatted(date: .abbreviated, time: .shortened))
+                                Text(partita.dataOra.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened).locale(Locale(identifier: "it_IT"))))
                                 Spacer()
                                 Text("Convocati: \(partita.convocati.count)")
                                     .fontWeight(.medium)
@@ -163,6 +163,7 @@ private struct CondivisioneMessaggioView: UIViewControllerRepresentable {
 }
 
 struct DettaglioPartitaView: View {
+    @Environment(\.dismiss) private var dismiss
     @Bindable var partita: Partita
     @Query(sort: \Giocatore.cognome) private var rosa: [Giocatore]
     
@@ -182,7 +183,7 @@ struct DettaglioPartitaView: View {
                 }
                 .pickerStyle(.menu)
 
-                DatePicker("Data e Ora", selection: $partita.dataOra)
+                BoardDateTimePicker(selection: $partita.dataOra)
                 
                 Picker("Dove si gioca", selection: $partita.inCasa.animation()) {
                     Text("In Casa").tag(true)
@@ -225,7 +226,16 @@ struct DettaglioPartitaView: View {
             }
         }
         .boardList(BoardPalette.partite)
-        .navigationTitle("Dettaglio Partita")
+        //.navigationTitle("Dettaglio Partita")
+        .navigationBarBackButtonHidden()
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Torna alle partite") {
+                    dismiss()
+                }
+                .font(.caption.weight(.semibold))
+            }
+        }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -242,7 +252,7 @@ struct DettaglioPartitaView: View {
     }
     
     private func preparaMessaggio() -> String {
-        let dataFormattata = partita.dataOra.formatted(date: .long, time: .shortened)
+        let dataFormattata = partita.dataOra.formatted(Date.FormatStyle(date: .long, time: .shortened).locale(Locale(identifier: "it_IT")))
         let ordinati = partita.convocati.sorted { $0.cognome < $1.cognome }
         
         var testo = "⚽️ *CONVOCAZIONI: \(String(localized: partita.tipo.titolo))*\n"
@@ -265,7 +275,7 @@ struct DettaglioPartitaView: View {
             }
         }
         
-        testo += "\n⏰ Ritrovo: "
+        testo += partita.inCasa ? "\n⏰ Ritrovo: In Casa" : "\n⏰ Ritrovo: "
         return testo
     }
     

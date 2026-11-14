@@ -8,7 +8,6 @@
 
 // TODO: Quando la partira è in casa, non deve comparire Ritrovo nell'export
 // TODO: Creare video e banner
-// TODO: Creare suggerimenti quando le sezioni partite e allenamenti sono vuote
 
 import SwiftUI
 import SwiftData

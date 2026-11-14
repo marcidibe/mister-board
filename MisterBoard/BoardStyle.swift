@@ -45,6 +45,47 @@ struct BoardSummaryCard: View {
     }
 }
 
+struct BoardDateTimePicker: View {
+    @Binding var selection: Date
+    @State private var mostraSelettore = false
+
+    var body: some View {
+        Button {
+            mostraSelettore = true
+        } label: {
+            HStack {
+                Text("Data e Ora")
+                    .foregroundStyle(.primary)
+                Spacer()
+                Text(selection.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened).locale(Locale(identifier: "it_IT"))))
+                    .multilineTextAlignment(.trailing)
+            }
+        }
+        .sheet(isPresented: $mostraSelettore) {
+            NavigationStack {
+                ScrollView {
+                    DatePicker("Data e Ora", selection: $selection, displayedComponents: [.date, .hourAndMinute])
+                        .datePickerStyle(.wheel)
+                        .environment(\.locale, Locale(identifier: "it_IT"))
+                        .labelsHidden()
+                        .padding()
+                }
+                .navigationTitle("Data e Ora")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Fine") {
+                            mostraSelettore = false
+                        }
+                    }
+                }
+            }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
+    }
+}
+
 struct BoardIcon: View {
     let symbol: String
     let color: Color

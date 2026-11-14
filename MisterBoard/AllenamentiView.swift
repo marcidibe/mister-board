@@ -53,7 +53,7 @@ struct AllenamentiView: View {
                                 .font(.caption.weight(.bold))
                                 .foregroundStyle(.secondary)
                             
-                            Text(allenamento.dataOra.formatted(date: .abbreviated, time: .shortened))
+                            Text(allenamento.dataOra.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened).locale(Locale(identifier: "it_IT"))))
                                 .font(.headline)
                             
                             HStack {
@@ -128,6 +128,7 @@ struct AllenamentiView: View {
 }
 
 struct DettaglioAllenamentoView: View {
+    @Environment(\.dismiss) private var dismiss
     @Bindable var allenamento: Allenamento
     @Query(sort: \Giocatore.cognome) private var rosa: [Giocatore]
     
@@ -137,8 +138,8 @@ struct DettaglioAllenamentoView: View {
     
     var body: some View {
         Form {
-            Section("Dettagli Sessione") {
-                DatePicker("Data e Ora", selection: $allenamento.dataOra)
+            Section("Dettagli Allenamento") {
+                BoardDateTimePicker(selection: $allenamento.dataOra)
                 TextField("Note (es. Atletica, Partitella...)", text: $allenamento.note)
             }
             
@@ -172,7 +173,16 @@ struct DettaglioAllenamentoView: View {
             }
         }
         .boardList(BoardPalette.allenamenti)
-        .navigationTitle("Presenze Allenamento")
+        //.navigationTitle("Presenze Allenamento")
+        .navigationBarBackButtonHidden()
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Torna agli allenamenti") {
+                    dismiss()
+                }
+                .font(.caption.weight(.semibold))
+            }
+        }
     }
     
     private func isPresente(_ giocatore: Giocatore) -> Bool {
