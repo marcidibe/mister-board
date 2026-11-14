@@ -15,6 +15,13 @@ struct RosaView: View {
     @State private var testoRicerca = ""
     @State private var mostraAggiuntaSingola = false
     @State private var mostraImportazione = false
+    @State private var mostraGestisci = false
+    @State private var azioneGestisci: AzioneGestisci?
+
+    private enum AzioneGestisci {
+        case importa
+        case elimina
+    }
     
     @State private var nome = ""
     @State private var cognome = ""
@@ -108,21 +115,8 @@ struct RosaView: View {
             //.navigationTitle("Rosa")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Menu {
-                        Button {
-                            mostraImportazione = true
-                        } label: {
-                            Label("Importa una lista", systemImage: "doc.on.clipboard")
-                        }
-                        
-                        if !rosa.isEmpty {
-                            Divider()
-                            Button(role: .destructive) {
-                                mostraConfermaCancellaTutto = true
-                            } label: {
-                                Label("Cancella tutta la rosa", systemImage: "trash")
-                            }
-                        }
+                    Button {
+                        mostraGestisci = true
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "ellipsis.circle")
@@ -131,6 +125,48 @@ struct RosaView: View {
                         .font(.caption.weight(.semibold))
                     }
                     .accessibilityLabel("Gestisci lista giocatori")
+                    .popover(isPresented: $mostraGestisci) {
+                        VStack(alignment: .leading, spacing: 0) {
+                            Button {
+                                azioneGestisci = .importa
+                                mostraGestisci = false
+                            } label: {
+                                Label("Importa una lista", systemImage: "doc.on.clipboard")
+                                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                                    .contentShape(Rectangle())
+                            }
+                            if !rosa.isEmpty {
+                                Divider()
+                                Button(role: .destructive) {
+                                    azioneGestisci = .elimina
+                                    mostraGestisci = false
+                                } label: {
+                                    Label("Elimina tutto", systemImage: "trash")
+                                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                                        .contentShape(Rectangle())
+                                }
+                                .foregroundStyle(.red)
+                            }
+                        }
+                        .font(.caption.weight(.semibold))
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .fixedSize(horizontal: true, vertical: true)
+                        .presentationCompactAdaptation(.popover)
+                        .onDisappear {
+                            // Presenta la destinazione dopo la chiusura del popover.
+                            switch azioneGestisci {
+                            case .importa:
+                                mostraImportazione = true
+                            case .elimina:
+                                mostraConfermaCancellaTutto = true
+                            case nil:
+                                break
+                            }
+                            azioneGestisci = nil
+                        }
+                    }
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
