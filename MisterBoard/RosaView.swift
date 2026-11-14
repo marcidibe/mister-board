@@ -20,6 +20,8 @@ struct RosaView: View {
     @State private var cognome = ""
     @State private var testoImportazione = ""
     @State private var mostraErroreImportazione = false
+    @State private var mostraDuplicatiImportazione = false
+    @State private var duplicatiImportazione: [String] = []
     
     @State private var giocatoreInModifica: Giocatore?
     @State private var nomeModifica = ""
@@ -163,6 +165,11 @@ struct RosaView: View {
                 Button("Aggiungi") {
                     aggiungiSingolo()
                 }
+                .disabled(esisteGiocatore(nome: nome, cognome: cognome))
+            } message: {
+                if esisteGiocatore(nome: nome, cognome: cognome) {
+                    Text("Questo giocatore è già presente nella rosa.")
+                }
             }
             .alert("Modifica Giocatore", isPresented: Binding(
                 get: { giocatoreInModifica != nil },
@@ -180,11 +187,16 @@ struct RosaView: View {
                 Button("Salva") {
                     salvaModifica()
                 }
+                .disabled(esisteGiocatore(nome: nomeModifica, cognome: cognomeModifica, escluso: giocatoreInModifica))
+            } message: {
+                if esisteGiocatore(nome: nomeModifica, cognome: cognomeModifica, escluso: giocatoreInModifica) {
+                    Text("Un altro giocatore ha già questo nome e cognome.")
+                }
             }
             .sheet(isPresented: $mostraImportazione) {
                 NavigationStack {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Incolla la lista giocatori, per riga, nel formato NOME COGNOME: due parole di sole lettere separate da un solo spazio.")
+                        Text("Inserisci un giocatore per riga, ad esempio MARIO DI DATO. La prima parola è il nome, le successive sono il cognome. Usa solo lettere e un singolo spazio tra le parole.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                         
@@ -209,10 +221,15 @@ struct RosaView: View {
                         }
                     }
                 }
+                .alert("Giocatori duplicati", isPresented: $mostraDuplicatiImportazione) {
+                    Button("OK", role: .cancel) {}
+                } message: {
+                    Text("Questi giocatori sono già nella rosa o ripetuti nella lista:\n\n\(duplicatiImportazione.joined(separator: "\n"))\n\nRimuovi i duplicati e riprova. Nessun giocatore è stato importato.")
+                }
                 .alert("Lista non valida", isPresented: $mostraErroreImportazione) {
                     Button("OK", role: .cancel) {}
                 } message: {
-                    Text("La lista caricata non rispetta le regole richieste. Inserisci un giocatore per riga nel formato NOME COGNOME: due parole di sole lettere separate da un solo spazio, senza numeri, simboli o righe vuote. Nessun giocatore è stato importato.")
+                    Text("Inserisci nome e cognome per ogni riga, ad esempio MARIO DI DATO. La prima parola è il nome, le successive sono il cognome. Usa solo lettere e un singolo spazio tra le parole, senza righe vuote. Nessun giocatore è stato importato.")
                 }
             }
         }
@@ -232,6 +249,17 @@ struct RosaView: View {
 
 
     
+    private func esisteGiocatore(nome: String, cognome: String, escluso: Giocatore? = nil) -> Bool {
+        let chiave = TestoAnagrafico.chiave(
+            nome: TestoAnagrafico.normalizza(nome),
+            cognome: TestoAnagrafico.normalizza(cognome)
+        )
+        return rosa.contains {
+            $0.id != escluso?.id &&
+            TestoAnagrafico.chiave(nome: $0.nome, cognome: $0.cognome) == chiave
+        }
+    }
+
     private func apriModifica(per giocatore: Giocatore) {
         nomeModifica = giocatore.nome
         cognomeModifica = giocatore.cognome
@@ -242,6 +270,7 @@ struct RosaView: View {
         guard let giocatore = giocatoreInModifica else { return }
         let n = TestoAnagrafico.normalizza(nomeModifica).trimmingCharacters(in: .whitespaces)
         let c = TestoAnagrafico.normalizza(cognomeModifica).trimmingCharacters(in: .whitespaces)
+        guard !esisteGiocatore(nome: n, cognome: c, escluso: giocatore) else { return }
         if !n.isEmpty || !c.isEmpty {
             giocatore.nome = n
             giocatore.cognome = c
@@ -254,6 +283,7 @@ struct RosaView: View {
         let c = TestoAnagrafico.normalizza(cognome).trimmingCharacters(in: .whitespaces)
         guard !n.isEmpty || !c.isEmpty else { return }
         
+        guard !esisteGiocatore(nome: n, cognome: c) else { return }
         let nuovo = Giocatore(nome: n, cognome: c)
         modelContext.insert(nuovo)
         resetCampi()
@@ -263,6 +293,21 @@ struct RosaView: View {
         testoImportazione = testoImportazione.uppercased()
         guard let giocatori = TestoAnagrafico.validaLista(testoImportazione) else {
             mostraErroreImportazione = true
+            return
+        }
+
+        // Verifica l'intera lista prima di inserire, evitando importazioni parziali.
+        var chiavi = Set(rosa.map { TestoAnagrafico.chiave(nome: $0.nome, cognome: $0.cognome) })
+        var chiaviDuplicate = Set<[String]>()
+        duplicatiImportazione = []
+        for giocatore in giocatori {
+            let chiave = TestoAnagrafico.chiave(nome: giocatore.nome, cognome: giocatore.cognome)
+            if !chiavi.insert(chiave).inserted && chiaviDuplicate.insert(chiave).inserted {
+                duplicatiImportazione.append("\(giocatore.nome) \(giocatore.cognome)")
+            }
+        }
+        if !duplicatiImportazione.isEmpty {
+            mostraDuplicatiImportazione = true
             return
         }
 

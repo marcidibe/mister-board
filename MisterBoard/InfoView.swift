@@ -16,13 +16,13 @@ struct HelpView: View {
                         iconName: "person.3.fill",
                         color: BoardPalette.rosa,
                         title: "Gestisci i giocatori",
-                        description: "Tocca “Nuovo giocatore” per aggiungere un atleta. Tocca un nome per modificarlo."
+                        description: "Tocca “Nuovo giocatore” per aggiungere un atleta. Se nome e cognome sono già presenti nella rosa, il tasto “Aggiungi” è disabilitato. Tocca un nome per modificarlo."
                     )
                     HelpRow(
                         iconName: "doc.on.clipboard",
                         color: BoardPalette.rosa,
                         title: "Importa una lista",
-                        description: "Da “Gestisci”, scegli “Importa una lista”. Inserisci un giocatore per riga: NOME COGNOME, due parole di sole lettere separate da un solo spazio, senza righe vuote."
+                        description: "Da “Gestisci”, scegli “Importa una lista”. Scrivi un giocatore per riga, ad esempio MARIO DI ROSSI: la prima parola è il nome, le successive sono il cognome. Usa solo lettere e un singolo spazio tra le parole, senza righe vuote. Se ci sono giocatori già presenti o ripetuti nella lista, un avviso blocca l’importazione: rimuovi i duplicati e riprova. Nessun giocatore viene importato."
                     )
                 }
 

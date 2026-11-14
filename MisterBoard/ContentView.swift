@@ -6,7 +6,6 @@
 //
 
 
-// TODO: Quando la partira è in casa, non deve comparire Ritrovo nell'export
 // TODO: Creare video e banner
 
 import SwiftUI

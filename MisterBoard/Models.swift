@@ -20,13 +20,21 @@ enum TestoAnagrafico {
         var giocatori: [(nome: String, cognome: String)] = []
         for riga in lista.components(separatedBy: "\n") {
             let parti = riga.split(separator: " ", omittingEmptySubsequences: false)
-            guard parti.count == 2,
+            guard parti.count >= 2,
                   parti.allSatisfy({ !$0.isEmpty && $0.allSatisfy(\.isLetter) }) else {
                 return nil
             }
-            giocatori.append((nome: String(parti[0]), cognome: String(parti[1])))
+            // La prima parola è il nome; le successive formano il cognome composto.
+            giocatori.append((nome: String(parti[0]), cognome: parti.dropFirst().joined(separator: " ")))
         }
         return giocatori
+    }
+
+    // Mantiene separati nome e cognome, ignorando maiuscole e spazi ripetuti.
+    static func chiave(nome: String, cognome: String) -> [String] {
+        [nome, cognome].map {
+            $0.uppercased().split(whereSeparator: \.isWhitespace).joined(separator: " ")
+        }
     }
 
     static func normalizza(_ testo: String) -> String {
