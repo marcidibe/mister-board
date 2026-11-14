@@ -6,9 +6,7 @@
 //
 
 
-// TODO: Ridurre dimensione card nomi giocatori
 // TODO: Quando la partira è in casa, non deve comparire Ritrovo nell'export
-// TODO: Non funziona export partita(se apro mail o WA non c'è il testo del messaggio)
 // TODO: Creare video e banner
 // TODO: Creare suggerimenti quando le sezioni partite e allenamenti sono vuote
 

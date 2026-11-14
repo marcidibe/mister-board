@@ -24,6 +24,28 @@ struct AllenamentiView: View {
                     count: allenamenti.count
                 )
                 
+                if allenamenti.isEmpty {
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "lightbulb.fill")
+                            .font(.title3)
+                            .foregroundStyle(BoardPalette.allenamenti)
+                            .padding(10)
+                            .background(BoardPalette.allenamenti.opacity(0.12), in: Circle())
+                            .accessibilityHidden(true)
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Si comincia in campo!")
+                                .font(.subheadline.weight(.semibold))
+                            Text("Tocca “Nuovo allenamento” in alto per aggiungere la prima sessione e registrare le presenze.\n\nPer cancellare una singola voce, scorri sulla sua riga da destra verso sinistra e tocca “Elimina”.")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 8)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
+
                 ForEach(allenamenti) { allenamento in
                     NavigationLink(destination: DettaglioAllenamentoView(allenamento: allenamento)) {
                         VStack(alignment: .leading, spacing: 12) {

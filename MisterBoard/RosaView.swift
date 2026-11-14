@@ -53,6 +53,28 @@ struct RosaView: View {
                     count: rosa.count
                 )
                 
+                if rosa.isEmpty {
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "lightbulb.fill")
+                            .font(.title3)
+                            .foregroundStyle(BoardPalette.rosa)
+                            .padding(10)
+                            .background(BoardPalette.rosa.opacity(0.12), in: Circle())
+                            .accessibilityHidden(true)
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Dai forma alla tua squadra!")
+                                .font(.subheadline.weight(.semibold))
+                            Text("Tocca “Nuovo giocatore” in alto per aggiungere il primo atleta, oppure scegli “Importa una lista” dal menu “Gestisci”.\n\nPer cancellare una singola voce, scorri sulla sua riga da destra verso sinistra e tocca “Elimina”.")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 8)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
+
                 ForEach(rosaFiltrata) { giocatore in
                     Button {
                         apriModifica(per: giocatore)

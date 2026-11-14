@@ -25,6 +25,28 @@ struct PartiteView: View {
                     count: partite.count
                 )
                 
+                if partite.isEmpty {
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "lightbulb.fill")
+                            .font(.title3)
+                            .foregroundStyle(BoardPalette.partite)
+                            .padding(10)
+                            .background(BoardPalette.partite.opacity(0.12), in: Circle())
+                            .accessibilityHidden(true)
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Pronti a scendere in campo?")
+                                .font(.subheadline.weight(.semibold))
+                            Text("Tocca “Nuova partita” in alto per creare la prima partita e scegliere i convocati.\n\nPer cancellare una singola voce, scorri sulla sua riga da destra verso sinistra e tocca “Elimina”.")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 8)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
+
                 ForEach(partite) { partita in
                     NavigationLink(destination: DettaglioPartitaView(partita: partita)) {
                         VStack(alignment: .leading, spacing: 6) {
