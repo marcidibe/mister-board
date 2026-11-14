@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct PartiteView: View {
     @Environment(\.modelContext) private var modelContext
@@ -17,7 +18,7 @@ struct PartiteView: View {
         NavigationStack {
             List {
                 BoardSummaryCard(
-                    title: "Le tue convocazioni",
+                    title: "Le tue partite",
                     subtitle: "Tutto inizia qui",
                     symbol: "sportscourt.fill",
                     color: BoardPalette.partite,
@@ -74,7 +75,7 @@ struct PartiteView: View {
                             Image(systemName: "trash")
                             Text("Elimina tutto")
                         }
-                        .font(.caption.weight(.semibold))
+                        .font(.caption2.weight(.semibold))
                     }
                     .disabled(partite.isEmpty)
                     .accessibilityLabel("Cancella tutte le partite")
@@ -88,7 +89,7 @@ struct PartiteView: View {
                             Image(systemName: "plus")
                             Text("Nuova partita")
                         }
-                        .font(.caption.weight(.semibold))
+                        .font(.caption2.weight(.semibold))
                     }
                     .accessibilityLabel("Nuova partita")
                 }
@@ -123,12 +124,27 @@ struct PartiteView: View {
     }
 }
 
+private struct MessaggioCondivisione: Identifiable {
+    let id = UUID()
+    let testo: String
+}
+
+private struct CondivisioneMessaggioView: UIViewControllerRepresentable {
+    let testo: String
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        // Passa il testo corrente direttamente alle app di destinazione.
+        UIActivityViewController(activityItems: [testo], applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
 struct DettaglioPartitaView: View {
     @Bindable var partita: Partita
     @Query(sort: \Giocatore.cognome) private var rosa: [Giocatore]
     
-    @State private var mostraAnteprimaCondivisione = false
-    @State private var messaggioModificabile = ""
+    @State private var messaggioDaCondividere: MessaggioCondivisione?
     
     private var tuttiConvocati: Bool {
         !rosa.isEmpty && partita.convocati.count == rosa.count
@@ -191,50 +207,19 @@ struct DettaglioPartitaView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    preparaMessaggio()
-                    mostraAnteprimaCondivisione = true
+                    messaggioDaCondividere = MessaggioCondivisione(testo: preparaMessaggio())
                 } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "square.and.arrow.up")
-                        Text("Prepara messaggio")
-                    }
+                    Label("Condividi", systemImage: "square.and.arrow.up")
+                        .font(.caption.weight(.semibold))
                 }
             }
         }
-        .sheet(isPresented: $mostraAnteprimaCondivisione) {
-            NavigationStack {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Puoi modificare liberamente il testo prima di inviarlo:")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    
-                    TextEditor(text: $messaggioModificabile)
-                        .padding(8)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
-                        )
-                }
-                .padding()
-                .navigationTitle("Messaggio Convocati")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Chiudi") {
-                            mostraAnteprimaCondivisione = false
-                        }
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        ShareLink(item: messaggioModificabile) {
-                            Label("Invia", systemImage: "paperplane.fill")
-                        }
-                    }
-                }
-            }
+        .sheet(item: $messaggioDaCondividere) { messaggio in
+            CondivisioneMessaggioView(testo: messaggio.testo)
         }
     }
     
-    private func preparaMessaggio() {
+    private func preparaMessaggio() -> String {
         let dataFormattata = partita.dataOra.formatted(date: .long, time: .shortened)
         let ordinati = partita.convocati.sorted { $0.cognome < $1.cognome }
         
@@ -259,7 +244,7 @@ struct DettaglioPartitaView: View {
         }
         
         testo += "\n⏰ Ritrovo: "
-        messaggioModificabile = testo
+        return testo
     }
     
     private func isConvocato(_ giocatore: Giocatore) -> Bool {

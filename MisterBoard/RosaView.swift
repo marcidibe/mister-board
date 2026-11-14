@@ -57,11 +57,15 @@ struct RosaView: View {
                     Button {
                         apriModifica(per: giocatore)
                     } label: {
-                        HStack(spacing: 10) {
-                            BoardIcon(symbol: "person.fill", color: BoardPalette.rosa)
-                                .padding(.trailing, 2)
+                        HStack(spacing: 8) {
+                            Image(systemName: "person.fill")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(BoardPalette.rosa)
+                                .padding(7)
+                                .background(BoardPalette.rosa.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
+                                .accessibilityHidden(true)
                             Text(giocatore.nomeCompleto)
-                                .font(.subheadline)
+                                .font(.footnote)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.8)
                                 .truncationMode(.tail)
@@ -74,7 +78,7 @@ struct RosaView: View {
                     }
                 }
                 .onDelete(perform: eliminaGiocatori)
-                .boardCardRow(BoardPalette.rosa)
+                .boardCardRow(BoardPalette.rosa, compact: true)
             }
             .boardList(BoardPalette.rosa)
             //.navigationTitle("Rosa")

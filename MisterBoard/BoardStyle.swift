@@ -61,16 +61,18 @@ struct BoardIcon: View {
 
 private struct BoardCardRow: ViewModifier {
     let color: Color
+    let compact: Bool
 
     func body(content: Content) -> some View {
         content
-            .padding(.vertical, 10)
+            .padding(.vertical, compact ? 2 : 10)
+            .listRowInsets(compact ? EdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12) : nil)
             .listRowSeparator(.hidden)
             .listRowBackground(
-                RoundedRectangle(cornerRadius: 22)
+                RoundedRectangle(cornerRadius: compact ? 14 : 22)
                     .fill(color.opacity(0.10).gradient)
                     .overlay {
-                        RoundedRectangle(cornerRadius: 22)
+                        RoundedRectangle(cornerRadius: compact ? 14 : 22)
                             .strokeBorder(color.opacity(0.18), lineWidth: 1)
                     }
                     .padding(.vertical, 4)
@@ -79,8 +81,8 @@ private struct BoardCardRow: ViewModifier {
 }
 
 extension View {
-    func boardCardRow(_ color: Color) -> some View {
-        modifier(BoardCardRow(color: color))
+    func boardCardRow(_ color: Color, compact: Bool = false) -> some View {
+        modifier(BoardCardRow(color: color, compact: compact))
     }
 
     func boardList(_ color: Color) -> some View {

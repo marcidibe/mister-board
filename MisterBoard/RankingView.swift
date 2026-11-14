@@ -38,7 +38,7 @@ struct RankingView: View {
                         conteggio: tipoRanking == 0 ? giocatore.allenamentiPresenti.count : giocatore.partiteConvocate.count,
                         totale: tipoRanking == 0 ? allenamenti.count : partite.count
                     )
-                    .boardCardRow(BoardPalette.ranking)
+                    .boardCardRow(BoardPalette.ranking, compact: true)
                 }
             }
             .boardList(BoardPalette.ranking)
@@ -54,23 +54,23 @@ private struct RankingCard: View {
     let totale: Int
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
                 Text(posizione, format: .number)
-                    .font(.system(.title2, design: .rounded, weight: .bold))
-                    .padding(10)
+                    .font(.system(.footnote, design: .rounded, weight: .bold))
+                    .padding(7)
                     .background(BoardPalette.ranking.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
                 Text(nome)
-                    .font(.subheadline)
+                    .font(.footnote)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                     .truncationMode(.tail)
                 Spacer(minLength: 4)
-                VStack(alignment: .trailing, spacing: 4) {
+                VStack(alignment: .trailing, spacing: 2) {
                     Text("\(conteggio) / \(totale)")
-                        .font(.subheadline.weight(.semibold))
+                        .font(.caption.weight(.semibold))
                     Text("\(totale > 0 ? Int(Double(conteggio) / Double(totale) * 100) : 0)%")
-                        .font(.caption)
+                        .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
             }

@@ -5,14 +5,12 @@
 //  Created by Marcello Di Benedetto on 13/11/2026.
 //
 
-// TODO:
-    // 1 - ridurre dimensione card nomi giocatori
-    // ** 2 - button cancella tutto con alert su allenamenti e partite --> FATTO **
-    // 3 - quando la partira è in casa, non deve comparire Ritrovo nell'export
-    // 4 - non funziona export
-    // ** 5 - aggiungere guida dettagliata per utilizzo --> FATTO **
-    // 6 - creare video e banner
-    // 7 - creare suggerimenti
+
+// TODO: Ridurre dimensione card nomi giocatori
+// TODO: Quando la partira è in casa, non deve comparire Ritrovo nell'export
+// TODO: Non funziona export partita(se apro mail o WA non c'è il testo del messaggio)
+// TODO: Creare video e banner
+// TODO: Creare suggerimenti quando le sezioni partite e allenamenti sono vuote
 
 import SwiftUI
 import SwiftData
@@ -20,10 +18,6 @@ import SwiftData
 struct ContentView: View {
     var body: some View {
         TabView {
-            HelpView()
-                .tabItem {
-                    Label("Info", systemImage: "info.circle")
-                }
             RosaView()
                 .tabItem {
                     Label("Rosa", systemImage: "person.3.fill")
@@ -31,7 +25,7 @@ struct ContentView: View {
             
             PartiteView()
                 .tabItem {
-                    Label("Convocazioni", systemImage: "sportscourt.fill")
+                    Label("Partite", systemImage: "sportscourt.fill")
                 }
             
             AllenamentiView()
@@ -42,6 +36,10 @@ struct ContentView: View {
             RankingView()
                 .tabItem {
                     Label("Ranking", systemImage: "trophy.fill")
+                }
+            HelpView()
+                .tabItem {
+                    Label("Info", systemImage: "info.circle")
                 }
         }
     }

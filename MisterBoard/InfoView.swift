@@ -48,17 +48,6 @@ struct HelpView: View {
             }
             .listStyle(InsetGroupedListStyle())
             .navigationTitle("Guida e Informazioni")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        Text("Chiudi")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.blue)
-                    }
-                }
-            }
         }
     }
 }
