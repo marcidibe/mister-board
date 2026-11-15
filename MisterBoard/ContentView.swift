@@ -68,7 +68,7 @@ struct ContentView: View {
             RosaView(selezione: selezione)
                 .id(selezione.wrappedValue)
                 .tabItem {
-                    Label("Rosa", systemImage: "person.3.fill")
+                    Label("Rose", systemImage: "person.3.fill")
                 }
             
             PartiteView(selezione: selezione)
