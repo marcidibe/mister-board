@@ -46,6 +46,9 @@ enum TestoAnagrafico {
 
 @Model
 final class Giocatore {
+    // Opzionale per consentire la migrazione dei dati precedenti alle annate.
+    var rosaID: UUID?
+
     var nome: String
     var cognome: String
     
@@ -79,6 +82,9 @@ enum TipoPartita: String {
 
 @Model
 final class Partita {
+    // Opzionale per consentire la migrazione dei dati precedenti alle annate.
+    var rosaID: UUID?
+
     var dataOra: Date
     var avversario: String // Opzionale: utile per distinguere le partite nello storico
     var inCasa: Bool = true
@@ -103,6 +109,9 @@ final class Partita {
 
 @Model
 final class Allenamento {
+    // Opzionale per consentire la migrazione dei dati precedenti alle annate.
+    var rosaID: UUID?
+
     var dataOra: Date
     var note: String
     
@@ -112,5 +121,62 @@ final class Allenamento {
     init(dataOra: Date = .now, note: String = "") {
         self.dataOra = dataOra
         self.note = note
+    }
+}
+
+@Model
+final class RosaAnnata {
+    var id: UUID = UUID()
+    var annata: String
+
+    init(annata: String) {
+        self.annata = annata
+    }
+}
+
+enum GestioneRose {
+    @MainActor
+    static func elimina(id: UUID, in context: ModelContext) throws {
+        // Conserva le modifiche precedenti prima di iniziare la cancellazione.
+        try context.save()
+        let rosaID: UUID? = id
+        let rose = try context.fetch(FetchDescriptor<RosaAnnata>(predicate: #Predicate { $0.id == id }))
+        let giocatori = try context.fetch(FetchDescriptor<Giocatore>(predicate: #Predicate { $0.rosaID == rosaID }))
+        let partite = try context.fetch(FetchDescriptor<Partita>(predicate: #Predicate { $0.rosaID == rosaID }))
+        let allenamenti = try context.fetch(FetchDescriptor<Allenamento>(predicate: #Predicate { $0.rosaID == rosaID }))
+        for partita in partite { context.delete(partita) }
+        for allenamento in allenamenti { context.delete(allenamento) }
+        for giocatore in giocatori { context.delete(giocatore) }
+        for rosa in rose { context.delete(rosa) }
+        do {
+            try context.save()
+        } catch {
+            context.rollback()
+            throw error
+        }
+    }
+}
+
+enum MigrazioneRose {
+    // Eseguita prima di mostrare le sezioni: conserva anche eventi senza partecipanti.
+    @MainActor
+    static func prepara(in context: ModelContext) throws {
+        let giocatori = try context.fetch(FetchDescriptor<Giocatore>(predicate: #Predicate { $0.rosaID == nil }))
+        let partite = try context.fetch(FetchDescriptor<Partita>(predicate: #Predicate { $0.rosaID == nil }))
+        let allenamenti = try context.fetch(FetchDescriptor<Allenamento>(predicate: #Predicate { $0.rosaID == nil }))
+        let haDatiPrecedenti = !giocatori.isEmpty || !partite.isEmpty || !allenamenti.isEmpty
+        guard haDatiPrecedenti else { return }
+
+        let rosa = RosaAnnata(annata: haDatiPrecedenti ? "Rosa esistente" : "Prima rosa")
+        context.insert(rosa)
+        for giocatore in giocatori { giocatore.rosaID = rosa.id }
+        for partita in partite { partita.rosaID = rosa.id }
+        for allenamento in allenamenti { allenamento.rosaID = rosa.id }
+        do {
+            try context.save()
+        } catch {
+            context.rollback()
+            throw error
+        }
     }
 }

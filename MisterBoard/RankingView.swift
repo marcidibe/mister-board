@@ -2,6 +2,16 @@ import SwiftUI
 import SwiftData
 
 struct RankingView: View {
+    @Binding var selezione: UUID
+
+    init(selezione: Binding<UUID>) {
+        _selezione = selezione
+        let rosaID: UUID? = selezione.wrappedValue
+        _giocatori = Query(filter: #Predicate<Giocatore> { $0.rosaID == rosaID }, sort: \Giocatore.cognome)
+        _partite = Query(filter: #Predicate<Partita> { $0.rosaID == rosaID }, sort: \Partita.dataOra, order: .reverse)
+        _allenamenti = Query(filter: #Predicate<Allenamento> { $0.rosaID == rosaID }, sort: \Allenamento.dataOra, order: .reverse)
+    }
+
     @Query private var giocatori: [Giocatore]
     @Query private var partite: [Partita]
     @Query private var allenamenti: [Allenamento]
@@ -21,6 +31,8 @@ struct RankingView: View {
     var body: some View {
         NavigationStack {
             List {
+                SelettoreAnnataView(selezione: $selezione, consenteGestione: false)
+
                 BoardSummaryCard(title: "Ogni presenza conta", subtitle: "Giocatori nel ranking", symbol: "trophy.fill", color: BoardPalette.ranking, count: giocatori.count)
 
                 Picker("Tipo Ranking", selection: $tipoRanking) {

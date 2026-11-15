@@ -10,6 +10,14 @@ import SwiftData
 import UIKit
 
 struct PartiteView: View {
+    @Binding var selezione: UUID
+
+    init(selezione: Binding<UUID>) {
+        _selezione = selezione
+        let rosaID: UUID? = selezione.wrappedValue
+        _partite = Query(filter: #Predicate<Partita> { $0.rosaID == rosaID }, sort: \Partita.dataOra, order: .reverse)
+    }
+
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Partita.dataOra, order: .reverse) private var partite: [Partita]
     @State private var mostraConfermaCancellaTutto = false
@@ -17,6 +25,8 @@ struct PartiteView: View {
     var body: some View {
         NavigationStack {
             List {
+                SelettoreAnnataView(selezione: $selezione, consenteGestione: false)
+
                 BoardSummaryCard(
                     title: "Le tue partite",
                     subtitle: "Tutto inizia qui",
@@ -122,7 +132,7 @@ struct PartiteView: View {
                     cancellaTutteLePartite()
                 }
             } message: {
-                Text("Stai per cancellare TUTTE le partite. L'operazione non può essere annullata.")
+                Text("Stai per cancellare TUTTE le partite della rosa selezionata. L'operazione non può essere annullata.")
             }
         }
 
@@ -130,6 +140,7 @@ struct PartiteView: View {
     
     private func creaNuovaPartita() {
         let nuova = Partita(dataOra: .now, inCasa: true, luogo: "")
+        nuova.rosaID = selezione
         modelContext.insert(nuova)
     }
     
@@ -164,6 +175,12 @@ private struct CondivisioneMessaggioView: UIViewControllerRepresentable {
 
 struct DettaglioPartitaView: View {
     @Environment(\.dismiss) private var dismiss
+    init(partita: Partita) {
+        self.partita = partita
+        let rosaID = partita.rosaID
+        _rosa = Query(filter: #Predicate<Giocatore> { $0.rosaID == rosaID }, sort: \Giocatore.cognome)
+    }
+
     @Bindable var partita: Partita
     @Query(sort: \Giocatore.cognome) private var rosa: [Giocatore]
     

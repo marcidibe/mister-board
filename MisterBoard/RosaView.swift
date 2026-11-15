@@ -9,6 +9,14 @@ import SwiftUI
 import SwiftData
 
 struct RosaView: View {
+    @Binding var selezione: UUID
+
+    init(selezione: Binding<UUID>) {
+        _selezione = selezione
+        let rosaID: UUID? = selezione.wrappedValue
+        _rosa = Query(filter: #Predicate<Giocatore> { $0.rosaID == rosaID }, sort: \Giocatore.cognome)
+    }
+
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Giocatore.cognome) private var rosa: [Giocatore]
     
@@ -35,9 +43,13 @@ struct RosaView: View {
     @State private var cognomeModifica = ""
     @State private var mostraConfermaCancellaTutto = false
 
-    private func cancellaTuttiIGiocatori() {
-        for giocatore in rosa {
-            modelContext.delete(giocatore)
+    @State private var erroreCancellazione: String?
+
+    private func cancellaRosa() {
+        do {
+            try GestioneRose.elimina(id: selezione, in: modelContext)
+        } catch {
+            erroreCancellazione = error.localizedDescription
         }
     }
     
@@ -54,6 +66,10 @@ struct RosaView: View {
     var body: some View {
         NavigationStack {
             List {
+                SelettoreAnnataView(selezione: $selezione, consenteGestione: true)
+                    .font(.footnote)
+                    .listRowBackground(BoardPalette.rosa.opacity(0.14))
+
                 BoardSummaryCard(
                     title: "La tua Rosa",
                     subtitle: "Atleti a disposizione",
@@ -135,13 +151,13 @@ struct RosaView: View {
                                     .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                                     .contentShape(Rectangle())
                             }
-                            if !rosa.isEmpty {
+                            Group {
                                 Divider()
                                 Button(role: .destructive) {
                                     azioneGestisci = .elimina
                                     mostraGestisci = false
                                 } label: {
-                                    Label("Elimina tutto", systemImage: "trash")
+                                    Label("Elimina rosa", systemImage: "trash")
                                         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                                         .contentShape(Rectangle())
                                 }
@@ -184,11 +200,19 @@ struct RosaView: View {
             }
             .alert("Eliminare tutta la rosa?", isPresented: $mostraConfermaCancellaTutto) {
                 Button("Annulla", role: .cancel) {}
-                Button("Elimina tutto", role: .destructive) {
-                    cancellaTuttiIGiocatori()
+                Button("Elimina rosa", role: .destructive) {
+                    cancellaRosa()
                 }
             } message: {
-                Text("Stai per cancellare TUTTI i giocatori della rosa. L'operazione non può essere annullata.")
+                Text("Stai per eliminare l’annata selezionata con tutti i suoi giocatori, allenamenti e partite. L’annata scomparirà da tutti i selettori. L’operazione non può essere annullata.")
+            }
+            .alert("Cancellazione non riuscita", isPresented: Binding(
+                get: { erroreCancellazione != nil },
+                set: { if !$0 { erroreCancellazione = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(erroreCancellazione ?? "")
             }
             .alert("Nuovo Giocatore", isPresented: $mostraAggiuntaSingola) {
                 TextField("Nome", text: $nome)
@@ -321,6 +345,7 @@ struct RosaView: View {
         
         guard !esisteGiocatore(nome: n, cognome: c) else { return }
         let nuovo = Giocatore(nome: n, cognome: c)
+        nuovo.rosaID = selezione
         modelContext.insert(nuovo)
         resetCampi()
     }
@@ -348,7 +373,9 @@ struct RosaView: View {
         }
 
         for giocatore in giocatori {
-            modelContext.insert(Giocatore(nome: giocatore.nome, cognome: giocatore.cognome))
+            let nuovo = Giocatore(nome: giocatore.nome, cognome: giocatore.cognome)
+            nuovo.rosaID = selezione
+            modelContext.insert(nuovo)
         }
         testoImportazione = ""
         mostraImportazione = false

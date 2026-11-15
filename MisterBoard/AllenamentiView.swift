@@ -9,6 +9,14 @@ import SwiftUI
 import SwiftData
 
 struct AllenamentiView: View {
+    @Binding var selezione: UUID
+
+    init(selezione: Binding<UUID>) {
+        _selezione = selezione
+        let rosaID: UUID? = selezione.wrappedValue
+        _allenamenti = Query(filter: #Predicate<Allenamento> { $0.rosaID == rosaID }, sort: \Allenamento.dataOra, order: .reverse)
+    }
+
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Allenamento.dataOra, order: .reverse) private var allenamenti: [Allenamento]
     @State private var mostraConfermaCancellaTutto = false
@@ -16,6 +24,8 @@ struct AllenamentiView: View {
     var body: some View {
         NavigationStack {
             List {
+                SelettoreAnnataView(selezione: $selezione, consenteGestione: false)
+
                 BoardSummaryCard(
                     title: "I tuoi allenamenti",
                     subtitle: "Sessioni di lavoro della squadra",
@@ -91,6 +101,7 @@ struct AllenamentiView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         let nuovo = Allenamento(dataOra: .now)
+                        nuovo.rosaID = selezione
                         modelContext.insert(nuovo)
                     } label: {
                         HStack(spacing: 4) {
@@ -108,7 +119,7 @@ struct AllenamentiView: View {
                     cancellaTuttiGliAllenamenti()
                 }
             } message: {
-                Text("Stai per cancellare TUTTI gli allenamenti. L'operazione non può essere annullata.")
+                Text("Stai per cancellare TUTTI gli allenamenti della rosa selezionata. L'operazione non può essere annullata.")
             }
         }
 
@@ -129,6 +140,12 @@ struct AllenamentiView: View {
 
 struct DettaglioAllenamentoView: View {
     @Environment(\.dismiss) private var dismiss
+    init(allenamento: Allenamento) {
+        self.allenamento = allenamento
+        let rosaID = allenamento.rosaID
+        _rosa = Query(filter: #Predicate<Giocatore> { $0.rosaID == rosaID }, sort: \Giocatore.cognome)
+    }
+
     @Bindable var allenamento: Allenamento
     @Query(sort: \Giocatore.cognome) private var rosa: [Giocatore]
     
