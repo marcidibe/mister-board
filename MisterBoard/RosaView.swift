@@ -19,6 +19,7 @@ struct RosaView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Giocatore.cognome) private var rosa: [Giocatore]
+    @Query private var annate: [RosaAnnata]
     
     @State private var testoRicerca = ""
     @State private var mostraAggiuntaSingola = false
@@ -71,7 +72,7 @@ struct RosaView: View {
                     .listRowBackground(BoardPalette.rosa.opacity(0.14))
 
                 BoardSummaryCard(
-                    title: "La tua Rosa",
+                    title: "\(annate.first(where: { $0.id == selezione })?.annata ?? "")",
                     subtitle: "Atleti a disposizione",
                     symbol: "person.3.fill",
                     color: BoardPalette.rosa,

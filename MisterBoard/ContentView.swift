@@ -13,6 +13,11 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \RosaAnnata.annata) private var rose: [RosaAnnata]
     @AppStorage("rosaSelezionata") private var rosaSelezionata = ""
+    private enum Scheda: Hashable {
+        case rose, partite, allenamenti, ranking, info
+    }
+
+    @State private var schedaSelezionata: Scheda = .rose
     @State private var pronto = false
     @State private var selezioneVuota = UUID()
     @State private var errore: String?
@@ -64,34 +69,26 @@ struct ContentView: View {
     }
 
     private func schede(selezione: Binding<UUID>) -> some View {
-        TabView {
-            RosaView(selezione: selezione)
-                .id(selezione.wrappedValue)
-                .tabItem {
-                    Label("Rose", systemImage: "person.3.fill")
-                }
-            
-            PartiteView(selezione: selezione)
-                .id(selezione.wrappedValue)
-                .tabItem {
-                    Label("Partite", systemImage: "sportscourt.fill")
-                }
-            
-            AllenamentiView(selezione: selezione)
-                .id(selezione.wrappedValue)
-                .tabItem {
-                    Label("Allenamenti", systemImage: "figure.run")
-                }
-            
-            RankingView(selezione: selezione)
-                .id(selezione.wrappedValue)
-                .tabItem {
-                    Label("Ranking", systemImage: "trophy.fill")
-                }
-            HelpView()
-                .tabItem {
-                    Label("Info", systemImage: "info.circle")
-                }
+        TabView(selection: $schedaSelezionata) {
+            Tab("Rose", systemImage: "person.3.fill", value: Scheda.rose) {
+                RosaView(selezione: selezione)
+                    .id(selezione.wrappedValue)
+            }
+            Tab("Partite", systemImage: "sportscourt.fill", value: Scheda.partite) {
+                PartiteView(selezione: selezione)
+                    .id(selezione.wrappedValue)
+            }
+            Tab("Allenamenti", systemImage: "figure.run", value: Scheda.allenamenti) {
+                AllenamentiView(selezione: selezione)
+                    .id(selezione.wrappedValue)
+            }
+            Tab("Ranking", systemImage: "trophy.fill", value: Scheda.ranking) {
+                RankingView(selezione: selezione)
+                    .id(selezione.wrappedValue)
+            }
+            Tab("Info", systemImage: "info.circle", value: Scheda.info) {
+                HelpView()
+            }
         }
     }
 }
