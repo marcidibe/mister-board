@@ -11,18 +11,30 @@ struct HelpView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Rosa") {
+                Section("Rose per annata") {
+                    HelpRow(
+                        iconName: "plus.circle.fill",
+                        color: BoardPalette.rosa,
+                        title: "Crea la tua prima rosa",
+                        description: "Se non ci sono rose, tocca “Crea la prima rosa” nella schermata di benvenuto. Scegli un’annata univoca, ad esempio 2013 o 2026/2027, e salva. Per aggiungerne altre, nella scheda Rose tocca “Aggiungi una Nuova Rosa”."
+                    )
+                    HelpRow(
+                        iconName: "calendar",
+                        color: BoardPalette.rosa,
+                        title: "Scegli e rinomina l’annata",
+                        description: "Il selettore “Annata” è disponibile in Rose, Partite, Allenamenti e Ranking. La scelta è condivisa tra le schede: ciascuna mostra i dati della rosa selezionata. Nella scheda Rose, il titolo della card riporta l’annata; usa “Rinomina annata” per cambiarne il nome."
+                    )
                     HelpRow(
                         iconName: "person.3.fill",
                         color: BoardPalette.rosa,
                         title: "Gestisci i giocatori",
-                        description: "Tocca “Nuovo giocatore” per aggiungere un atleta. Se nome e cognome sono già presenti nella rosa, il tasto “Aggiungi” è disabilitato. Tocca un nome per modificarlo."
+                        description: "Tocca “Nuovo giocatore” per aggiungere un atleta alla rosa selezionata. Se nome e cognome sono già presenti in quella rosa, il tasto “Aggiungi” è disabilitato. Lo stesso nome può essere presente in rose diverse. Tocca un nome per modificarlo."
                     )
                     HelpRow(
                         iconName: "doc.on.clipboard",
                         color: BoardPalette.rosa,
                         title: "Importa una lista",
-                        description: "Da “Gestisci”, scegli “Importa una lista”. Scrivi un giocatore per riga, ad esempio MARIO DI ROSSI: la prima parola è il nome, le successive sono il cognome. Usa solo lettere e un singolo spazio tra le parole, senza righe vuote. Se ci sono giocatori già presenti o ripetuti nella lista, un avviso blocca l’importazione: rimuovi i duplicati e riprova. Nessun giocatore viene importato."
+                        description: "Seleziona l’annata, poi da “Gestisci” scegli “Importa una lista”. Scrivi un giocatore per riga, ad esempio MARIO DI ROSSI: la prima parola è il nome, le successive sono il cognome. Usa solo lettere e un singolo spazio tra le parole, senza righe vuote. Se ci sono giocatori già presenti o ripetuti nella lista, un avviso blocca l’importazione: rimuovi i duplicati e riprova. Nessun giocatore viene importato."
                     )
                 }
 
@@ -31,13 +43,13 @@ struct HelpView: View {
                         iconName: "sportscourt.fill",
                         color: BoardPalette.partite,
                         title: "Organizza una partita",
-                        description: "Tocca “Nuova partita”, poi aprila per scegliere tipo, data e ora. Indica se giochi in casa o fuori casa e il campo della trasferta."
+                        description: "Seleziona l’annata e tocca “Nuova partita”: la partita appartiene a quella rosa. Aprila per scegliere tipo, data e ora. Indica se giochi in casa o fuori casa e il campo della trasferta."
                     )
                     HelpRow(
                         iconName: "checkmark.circle.fill",
                         color: BoardPalette.partite,
                         title: "Scegli i convocati",
-                        description: "Tocca i giocatori da convocare oppure usa “Seleziona tutti”. Tocca di nuovo un nome per rimuoverlo."
+                        description: "Sono disponibili solo i giocatori della rosa della partita. Tocca quelli da convocare oppure usa “Seleziona tutti”. Tocca di nuovo un nome per rimuoverlo."
                     )
                     HelpRow(
                         iconName: "square.and.arrow.up",
@@ -52,13 +64,13 @@ struct HelpView: View {
                         iconName: "figure.run",
                         color: BoardPalette.allenamenti,
                         title: "Registra una sessione di allenamento",
-                        description: "Tocca “Nuovo allenamento”, poi aprilo per impostare data, ora e note."
+                        description: "Seleziona l’annata e tocca “Nuovo allenamento”: la sessione appartiene a quella rosa. Aprila per impostare data, ora e note."
                     )
                     HelpRow(
                         iconName: "checklist",
                         color: BoardPalette.allenamenti,
                         title: "Segna le presenze",
-                        description: "Tocca i giocatori presenti oppure usa “Seleziona tutti”. Tocca di nuovo un nome per togliere la presenza."
+                        description: "Sono disponibili solo i giocatori della rosa dell’allenamento. Tocca i presenti oppure usa “Seleziona tutti”. Tocca di nuovo un nome per togliere la presenza."
                     )
                 }
 
@@ -67,7 +79,7 @@ struct HelpView: View {
                         iconName: "trophy.fill",
                         color: BoardPalette.ranking,
                         title: "Consulta la partecipazione",
-                        description: "Scegli “Allenamenti” o “Convocazioni” per ordinare i giocatori per presenze o convocazioni. Ogni riga mostra il conteggio e la percentuale sul totale."
+                        description: "Seleziona l’annata, poi scegli “Allenamenti” o “Convocazioni” per ordinare i giocatori per presenze o convocazioni. Ogni riga mostra il conteggio e la percentuale sul totale degli eventi della rosa selezionata. Ogni rosa ha una classifica indipendente."
                     )
                 }
 
@@ -76,13 +88,19 @@ struct HelpView: View {
                         iconName: "trash",
                         color: .red,
                         title: "Elimina le voci",
-                        description: "Scorri una riga verso sinistra per eliminarla. Per svuotare una sezione, usa “Elimina tutto” o “Gestisci” nella Rosa e conferma."
+                        description: "Scorri una riga verso sinistra per eliminare un giocatore, una partita o un allenamento. In Partite e Allenamenti, “Elimina tutto” cancella solo gli eventi di quella sezione per la rosa selezionata, dopo conferma. Le altre rose restano invariate."
+                    )
+                    HelpRow(
+                        iconName: "trash.circle.fill",
+                        color: .red,
+                        title: "Elimina una rosa",
+                        description: "Nella scheda Rose, scegli l’annata e apri “Gestisci” → “Elimina rosa”. Dopo la conferma vengono eliminati l’annata e tutti i suoi giocatori, allenamenti e partite. L’annata scompare da tutti i selettori; le altre rose rimangono intatte. L’operazione non può essere annullata. Se elimini l’ultima rosa, torna la schermata per crearne una nuova."
                     )
                     HelpRow(
                         iconName: "checkmark.shield.fill",
                         color: .blue,
                         title: "Salvataggio automatico",
-                        description: "Giocatori, partite e allenamenti vengono salvati automaticamente e restano disponibili alla riapertura dell’app."
+                        description: "Annate, giocatori, partite e allenamenti vengono salvati e restano disponibili alla riapertura dell’app. Anche la scelta dell’annata viene ricordata."
                     )
                 }
             }
