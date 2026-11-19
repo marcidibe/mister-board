@@ -28,7 +28,7 @@ struct HelpView: View {
                         iconName: "person.3.fill",
                         color: BoardPalette.rosa,
                         title: "Gestisci i giocatori",
-                        description: "Tocca “Nuovo giocatore” per aggiungere un atleta alla rosa selezionata. Se nome e cognome sono già presenti in quella rosa, il tasto “Aggiungi” è disabilitato. Lo stesso nome può essere presente in rose diverse. Tocca un nome per modificarlo."
+                        description: "Tocca “Nuovo giocatore” per aggiungere un atleta alla rosa selezionata. Compila il terzo campo, “Identificativo”, SOLO in caso di omonimia: due giocatori con lo stesso nome e cognome nella stessa rosa. Usa un numero di maglia o un soprannome diverso per distinguerli. Se non ci sono omonimi, lascia il campo vuoto. Nome, cognome e identificativo uguali vengono bloccati come duplicati. L’identificativo è visibile anche nelle presenze, nelle convocazioni e nel ranking. Aggiungi gli omonimi singolarmente tramite “Nuovo giocatore”. Lo stesso nome può essere presente in rose diverse. Tocca un nome per modificarlo."
                     )
                     HelpRow(
                         iconName: "doc.on.clipboard",

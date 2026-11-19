@@ -219,7 +219,7 @@ struct DettaglioPartitaView: View {
                         toggleConvocazione(per: giocatore)
                     } label: {
                         HStack {
-                            Text(giocatore.nomeCompleto)
+                            NomeGiocatoreView(giocatore: giocatore)
                                 .foregroundStyle(.primary)
                             Spacer()
                             Image(systemName: isConvocato(giocatore) ? "checkmark.circle.fill" : "circle")

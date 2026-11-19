@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Charts
 
 struct RankingView: View {
     @Binding var selezione: UUID
@@ -43,10 +44,13 @@ struct RankingView: View {
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
 
+                GraficoPartecipazioneView(giocatori: giocatori, tipoRanking: tipoRanking)
+                    .boardCardRow(BoardPalette.ranking)
+
                 ForEach(Array(giocatoriOrdinati.enumerated()), id: \.element.id) { index, giocatore in
                     RankingCard(
                         posizione: index + 1,
-                        nome: giocatore.nomeCompleto,
+                        giocatore: giocatore,
                         conteggio: tipoRanking == 0 ? giocatore.allenamentiPresenti.count : giocatore.partiteConvocate.count,
                         totale: tipoRanking == 0 ? allenamenti.count : partite.count
                     )
@@ -59,9 +63,111 @@ struct RankingView: View {
     }
 }
 
+private struct QuotaGiocatore: Identifiable {
+    let id: PersistentIdentifier
+    let nome: String
+    let iniziali: String
+    let conteggio: Int
+    let colore: Color
+}
+
+private struct GraficoPartecipazioneView: View {
+    let giocatori: [Giocatore]
+    let tipoRanking: Int
+
+    private var quote: [QuotaGiocatore] {
+        // L'ordine anagrafico mantiene gli stessi colori cambiando tipo di ranking.
+        giocatori.enumerated().map { indice, giocatore in
+            QuotaGiocatore(
+                id: giocatore.persistentModelID,
+                nome: giocatore.nomeCompleto,
+                iniziali: [giocatore.nome, giocatore.cognome]
+                    .compactMap { $0.trimmingCharacters(in: .whitespacesAndNewlines).first }
+                    .map { String($0).uppercased() }
+                    .joined() + (giocatore.identificativoPulito.isEmpty ? "" : " · \(giocatore.identificativoPulito)"),
+                conteggio: tipoRanking == 0 ? giocatore.allenamentiPresenti.count : giocatore.partiteConvocate.count,
+                colore: Color(hue: (Double(indice) * 0.61803398875).truncatingRemainder(dividingBy: 1),
+                              saturation: 0.65, brightness: 0.8)
+            )
+        }
+    }
+
+    var body: some View {
+        let dati = quote
+        let totale = dati.reduce(0) { $0 + $1.conteggio }
+        let fette = dati.filter { $0.conteggio > 0 }
+
+        VStack(alignment: .leading, spacing: 16) {
+            Text(tipoRanking == 0 ? "Distribuzione delle presenze" : "Distribuzione delle convocazioni")
+                .font(.headline)
+
+            if totale == 0 {
+                Label("Nessun dato da rappresentare", systemImage: "chart.pie")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                Text("Registra le presenze o le convocazioni per visualizzare le quote dei giocatori.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            } else {
+                Chart(fette) { quota in
+                    SectorMark(
+                        angle: .value("Partecipazioni", quota.conteggio),
+                        innerRadius: .ratio(0),
+                        angularInset: 1
+                    )
+                    .foregroundStyle(quota.colore)
+                    .annotation(position: .overlay) {
+                        Text(quota.iniziali)
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.white)
+                            .padding(3)
+                            .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 4))
+                            .accessibilityHidden(true)
+                    }
+                    .accessibilityLabel(quota.nome)
+                    .accessibilityValue(
+                        "\(quota.conteggio) partecipazioni, \((Double(quota.conteggio) / Double(totale)).formatted(.percent.precision(.fractionLength(1)))) del totale"
+                    )
+                }
+                .frame(height: 260)
+                .chartLegend(.hidden)
+
+                Text("Ogni fetta indica la quota del giocatore sul totale delle partecipazioni registrate. Le percentuali nell’elenco del ranking indicano invece la partecipazione ai singoli eventi.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                ForEach(dati) { quota in
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        Circle()
+                            .fill(quota.colore)
+                            .frame(width: 10, height: 10)
+                            .accessibilityHidden(true)
+                        Text(quota.nome)
+                            .font(.footnote)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 8)
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(Double(quota.conteggio) / Double(totale),
+                                 format: .percent.precision(.fractionLength(1)))
+                                .font(.footnote.weight(.semibold))
+                            Text("\(quota.conteggio) su \(totale)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .accessibilityElement(children: .combine)
+                }
+                Text("I giocatori con zero partecipazioni non occupano una fetta.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
 private struct RankingCard: View {
     let posizione: Int
-    let nome: String
+    let giocatore: Giocatore
     let conteggio: Int
     let totale: Int
 
@@ -72,7 +178,7 @@ private struct RankingCard: View {
                     .font(.system(.footnote, design: .rounded, weight: .bold))
                     .padding(7)
                     .background(BoardPalette.ranking.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
-                Text(nome)
+                NomeGiocatoreView(giocatore: giocatore)
                     .font(.footnote)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)

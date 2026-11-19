@@ -166,7 +166,7 @@ struct DettaglioAllenamentoView: View {
                         togglePresenza(per: giocatore)
                     } label: {
                         HStack {
-                            Text(giocatore.nomeCompleto)
+                            NomeGiocatoreView(giocatore: giocatore)
                                 .foregroundStyle(.primary)
                             Spacer()
                             Image(systemName: isPresente(giocatore) ? "checkmark.circle.fill" : "circle")

@@ -34,6 +34,7 @@ struct RosaView: View {
     
     @State private var nome = ""
     @State private var cognome = ""
+    @State private var identificativo = ""
     @State private var testoImportazione = ""
     @State private var mostraErroreImportazione = false
     @State private var mostraDuplicatiImportazione = false
@@ -42,6 +43,7 @@ struct RosaView: View {
     @State private var giocatoreInModifica: Giocatore?
     @State private var nomeModifica = ""
     @State private var cognomeModifica = ""
+    @State private var identificativoModifica = ""
     @State private var mostraConfermaCancellaTutto = false
 
     @State private var erroreCancellazione: String?
@@ -112,7 +114,7 @@ struct RosaView: View {
                                 .padding(7)
                                 .background(BoardPalette.rosa.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
                                 .accessibilityHidden(true)
-                            Text(giocatore.nomeCompleto)
+                            NomeGiocatoreView(giocatore: giocatore)
                                 .font(.footnote)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.8)
@@ -222,14 +224,18 @@ struct RosaView: View {
                 TextField("Cognome", text: $cognome)
                     .textInputAutocapitalization(.characters)
                     .autocorrectionDisabled()
+                TextField("Identificativo (solo per omonimi)", text: $identificativo)
+                    .textInputAutocapitalization(.characters)
+                    .autocorrectionDisabled()
                 Button("Annulla", role: .cancel) { resetCampi() }
                 Button("Aggiungi") {
                     aggiungiSingolo()
                 }
-                .disabled(esisteGiocatore(nome: nome, cognome: cognome))
+                .disabled(esisteGiocatore(nome: nome, cognome: cognome, identificativo: identificativo))
             } message: {
-                if esisteGiocatore(nome: nome, cognome: cognome) {
-                    Text("Questo giocatore è già presente nella rosa.")
+                Text("Compila il terzo campo SOLO se nella stessa rosa ci sono due giocatori con lo stesso nome e cognome. Usa un numero di maglia o un soprannome per distinguerli. Altrimenti lascialo vuoto.")
+                if esisteGiocatore(nome: nome, cognome: cognome, identificativo: identificativo) {
+                    Text("Nome e cognome già presenti con questo identificativo. Se è un omonimo, inserisci un numero di maglia o un soprannome diverso.")
                 }
             }
             .alert("Modifica Giocatore", isPresented: Binding(
@@ -242,16 +248,20 @@ struct RosaView: View {
                 TextField("Cognome", text: $cognomeModifica)
                     .textInputAutocapitalization(.characters)
                     .autocorrectionDisabled()
+                TextField("Identificativo (solo per omonimi)", text: $identificativoModifica)
+                    .textInputAutocapitalization(.characters)
+                    .autocorrectionDisabled()
                 Button("Annulla", role: .cancel) {
                     giocatoreInModifica = nil
                 }
                 Button("Salva") {
                     salvaModifica()
                 }
-                .disabled(esisteGiocatore(nome: nomeModifica, cognome: cognomeModifica, escluso: giocatoreInModifica))
+                .disabled(esisteGiocatore(nome: nomeModifica, cognome: cognomeModifica, identificativo: identificativoModifica, escluso: giocatoreInModifica))
             } message: {
-                if esisteGiocatore(nome: nomeModifica, cognome: cognomeModifica, escluso: giocatoreInModifica) {
-                    Text("Un altro giocatore ha già questo nome e cognome.")
+                Text("Il terzo campo serve SOLO per distinguere giocatori con lo stesso nome e cognome nella stessa rosa. Se non ci sono omonimi, lascialo vuoto.")
+                if esisteGiocatore(nome: nomeModifica, cognome: cognomeModifica, identificativo: identificativoModifica, escluso: giocatoreInModifica) {
+                    Text("Un altro giocatore ha già questo nome, cognome e identificativo. Usa un identificativo diverso per distinguere gli omonimi.")
                 }
             }
             .sheet(isPresented: $mostraImportazione) {
@@ -285,7 +295,7 @@ struct RosaView: View {
                 .alert("Giocatori duplicati", isPresented: $mostraDuplicatiImportazione) {
                     Button("OK", role: .cancel) {}
                 } message: {
-                    Text("Questi giocatori sono già nella rosa o ripetuti nella lista:\n\n\(duplicatiImportazione.joined(separator: "\n"))\n\nRimuovi i duplicati e riprova. Nessun giocatore è stato importato.")
+                    Text("Questi giocatori sono già nella rosa o ripetuti nella lista:\n\n\(duplicatiImportazione.joined(separator: "\n"))\n\nRimuovi i duplicati e riprova. Per un omonimo usa “Nuovo giocatore” e specifica un identificativo. Nessun giocatore è stato importato.")
                 }
                 .alert("Lista non valida", isPresented: $mostraErroreImportazione) {
                     Button("OK", role: .cancel) {}
@@ -310,20 +320,22 @@ struct RosaView: View {
 
 
     
-    private func esisteGiocatore(nome: String, cognome: String, escluso: Giocatore? = nil) -> Bool {
+    private func esisteGiocatore(nome: String, cognome: String, identificativo: String, escluso: Giocatore? = nil) -> Bool {
         let chiave = TestoAnagrafico.chiave(
             nome: TestoAnagrafico.normalizza(nome),
             cognome: TestoAnagrafico.normalizza(cognome)
         )
         return rosa.contains {
             $0.id != escluso?.id &&
-            TestoAnagrafico.chiave(nome: $0.nome, cognome: $0.cognome) == chiave
+            TestoAnagrafico.chiave(nome: $0.nome, cognome: $0.cognome) == chiave &&
+            $0.identificativoPulito == Giocatore.normalizzaIdentificativo(identificativo)
         }
     }
 
     private func apriModifica(per giocatore: Giocatore) {
         nomeModifica = giocatore.nome
         cognomeModifica = giocatore.cognome
+        identificativoModifica = giocatore.identificativoPulito
         giocatoreInModifica = giocatore
     }
     
@@ -331,10 +343,11 @@ struct RosaView: View {
         guard let giocatore = giocatoreInModifica else { return }
         let n = TestoAnagrafico.normalizza(nomeModifica).trimmingCharacters(in: .whitespaces)
         let c = TestoAnagrafico.normalizza(cognomeModifica).trimmingCharacters(in: .whitespaces)
-        guard !esisteGiocatore(nome: n, cognome: c, escluso: giocatore) else { return }
+        guard !esisteGiocatore(nome: n, cognome: c, identificativo: identificativoModifica, escluso: giocatore) else { return }
         if !n.isEmpty || !c.isEmpty {
             giocatore.nome = n
             giocatore.cognome = c
+            giocatore.identificativo = Giocatore.normalizzaIdentificativo(identificativoModifica)
         }
         giocatoreInModifica = nil
     }
@@ -344,9 +357,10 @@ struct RosaView: View {
         let c = TestoAnagrafico.normalizza(cognome).trimmingCharacters(in: .whitespaces)
         guard !n.isEmpty || !c.isEmpty else { return }
         
-        guard !esisteGiocatore(nome: n, cognome: c) else { return }
+        guard !esisteGiocatore(nome: n, cognome: c, identificativo: identificativo) else { return }
         let nuovo = Giocatore(nome: n, cognome: c)
         nuovo.rosaID = selezione
+        nuovo.identificativo = Giocatore.normalizzaIdentificativo(identificativo)
         modelContext.insert(nuovo)
         resetCampi()
     }
@@ -392,6 +406,7 @@ struct RosaView: View {
     private func resetCampi() {
         nome = ""
         cognome = ""
+        identificativo = ""
     }
 }
 

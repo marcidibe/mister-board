@@ -51,6 +51,7 @@ final class Giocatore {
 
     var nome: String
     var cognome: String
+    var identificativo: String? = nil
     
     // Relazioni inverse gestite automaticamente da SwiftData
     var partiteConvocate: [Partita] = []
@@ -61,8 +62,16 @@ final class Giocatore {
         self.cognome = cognome
     }
     
+    var identificativoPulito: String {
+        Self.normalizzaIdentificativo(identificativo ?? "")
+    }
+
+    static func normalizzaIdentificativo(_ testo: String) -> String {
+        testo.uppercased().split(whereSeparator: \.isWhitespace).joined(separator: " ")
+    }
+
     var nomeCompleto: String {
-        "\(cognome) \(nome)"
+        identificativoPulito.isEmpty ? "\(cognome) \(nome)" : "\(cognome) \(nome) · \(identificativoPulito)"
     }
 }
 
