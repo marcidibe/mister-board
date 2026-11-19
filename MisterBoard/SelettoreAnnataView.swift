@@ -33,6 +33,8 @@ private struct BenvenutoRosaView: View {
                         .font(.subheadline)
                         .foregroundStyle(.white.opacity(0.9))
                         .fixedSize(horizontal: false, vertical: true)
+
+                    GuidaRapidaRosaView()
                 }
             }
             .foregroundStyle(.white)
@@ -56,16 +58,7 @@ private struct BenvenutoRosaView: View {
             }
             .shadow(color: BoardPalette.rosa.opacity(0.16), radius: 18, y: 10)
 
-            VStack(alignment: .leading, spacing: 20) {
-                Text("Tutto parte da un’annata")
-                    .font(.title3.weight(.bold))
-
-                Label("Giocatori sempre organizzati", systemImage: "person.3")
-                Label("Presenze e convocazioni a portata di mano", systemImage: "checkmark.circle")
-                Label("Un ranking dedicato a ogni rosa", systemImage: "chart.bar")
-            }
-            .font(.footnote)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            SintesiRosaView()
 
             Button(action: creaRosa) {
                 HStack(spacing: 12) {
@@ -84,13 +77,97 @@ private struct BenvenutoRosaView: View {
                 )
             }
             .buttonStyle(.plain)
-
-            Text("Scegli l’annata, poi aggiungi i tuoi giocatori.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
         }
         .padding(.vertical, 12)
+    }
+}
+
+private struct SintesiRosaView: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Tutto parte da un’annata")
+                .font(.title3.weight(.bold))
+
+            Label("Giocatori sempre organizzati", systemImage: "person.3")
+            Label("Presenze e convocazioni a portata di mano", systemImage: "checkmark.circle")
+            Label("Un ranking dedicato a ogni rosa", systemImage: "chart.bar")
+        }
+        .font(.footnote)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct GuidaRapidaRosaView: View {
+    @State private var mostraGuida = false
+
+    var body: some View {
+        DisclosureGroup(isExpanded: $mostraGuida) {
+            VStack(alignment: .leading, spacing: 20) {
+                PassaggioGuidaRosaView(
+                    numero: 1,
+                    titolo: "Crea un’annata",
+                    descrizione: "Dai un nome alla rosa, ad esempio 2013 o 2026/2027."
+                )
+                PassaggioGuidaRosaView(
+                    numero: 2,
+                    titolo: "Aggiungi i giocatori",
+                    descrizione: "Inseriscili singolarmente oppure importa una lista dal menu Gestisci."
+                )
+                PassaggioGuidaRosaView(
+                    numero: 3,
+                    titolo: "Organizza la squadra",
+                    descrizione: "Registra presenze, prepara convocazioni e consulta il ranking della tua rosa."
+                )
+                Text("Troverai la guida completa nella scheda Info.")
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.8))
+            }
+            .padding(.top, 18)
+            .padding(.bottom, 4)
+        } label: {
+            Label("Come funziona", systemImage: "questionmark.circle")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(Color(red: 0.78, green: 0.9, blue: 1))
+                .padding(.vertical, 6)
+        }
+        .tint(Color(red: 0.78, green: 0.9, blue: 1))
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(
+            LinearGradient(
+                colors: [.white.opacity(0.12), .white.opacity(0.05)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ),
+            in: RoundedRectangle(cornerRadius: 14)
+        )
+    }
+}
+
+private struct PassaggioGuidaRosaView: View {
+    let numero: Int
+    let titolo: LocalizedStringResource
+    let descrizione: LocalizedStringResource
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text(numero, format: .number)
+                .font(.system(.footnote, design: .rounded, weight: .bold))
+                .foregroundStyle(Color(red: 0.78, green: 0.9, blue: 1))
+                .padding(10)
+                .background(.white.opacity(0.12), in: Circle())
+            VStack(alignment: .leading, spacing: 5) {
+                Text(titolo)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                Text(descrizione)
+                    .font(.footnote)
+                    .foregroundStyle(.white.opacity(0.9))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
     }
 }
 
