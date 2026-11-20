@@ -203,7 +203,7 @@ struct SelettoreAnnataView: View {
                 }
             }
             if !rose.isEmpty {
-                Picker("Annata", selection: $selezione) {
+                Picker("Rosa Giocatori", selection: $selezione) {
                     ForEach(rose) { rosa in
                         Text(rosa.annata).tag(rosa.id)
                     }
@@ -216,7 +216,7 @@ struct SelettoreAnnataView: View {
                     mostraEditor = true
                 }
                 if !rose.isEmpty {
-                    Button("Rinomina annata", systemImage: "pencil") {
+                    Button("Rinomina Rosa Giocatori", systemImage: "pencil") {
                         creaNuova = false
                         annata = rose.first(where: { $0.id == selezione })?.annata ?? ""
                         mostraEditor = true
@@ -224,7 +224,7 @@ struct SelettoreAnnataView: View {
                 }
             }
         }
-        .alert(creaNuova ? "Nuova rosa" : "Rinomina annata", isPresented: $mostraEditor) {
+        .alert(creaNuova ? "Nuova rosa" : "Rinomina Rosa Giocatori", isPresented: $mostraEditor) {
             TextField("Annata (es. 2014 o 2026/2027)", text: $annata)
             Button("Annulla", role: .cancel) {}
             Button("Salva") { salva() }

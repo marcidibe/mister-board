@@ -11,7 +11,9 @@ struct HelpView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Rose per annata") {
+                HelpIntroView()
+
+                Section("Rosa Giocatori") {
                     HelpRow(
                         iconName: "plus.circle.fill",
                         color: BoardPalette.rosa,
@@ -21,8 +23,8 @@ struct HelpView: View {
                     HelpRow(
                         iconName: "calendar",
                         color: BoardPalette.rosa,
-                        title: "Scegli e rinomina l’annata",
-                        description: "Il selettore “Annata” è disponibile in Rose, Partite, Allenamenti e Ranking. La scelta è condivisa tra le schede: ciascuna mostra i dati della rosa selezionata. Nella scheda Rose, il titolo della card riporta l’annata; usa “Rinomina annata” per cambiarne il nome."
+                        title: "Scegli e rinomina la rosa",
+                        description: "Il selettore “Rosa Giocatori” è disponibile in Rose, Partite, Allenamenti e Ranking. La scelta è condivisa tra le schede: ciascuna mostra i dati della rosa selezionata. Nella scheda Rose, il titolo della card riporta l’annata; usa “Rinomina Rosa Giocatori” per cambiarne il nome."
                     )
                     HelpRow(
                         iconName: "person.3.fill",
@@ -34,7 +36,7 @@ struct HelpView: View {
                         iconName: "doc.on.clipboard",
                         color: BoardPalette.rosa,
                         title: "Importa una lista",
-                        description: "Seleziona l’annata, poi da “Gestisci” scegli “Importa una lista”. Scrivi un giocatore per riga, ad esempio MARIO DI ROSSI: la prima parola è il nome, le successive sono il cognome. Usa solo lettere e un singolo spazio tra le parole, senza righe vuote. Se ci sono giocatori già presenti o ripetuti nella lista, un avviso blocca l’importazione: rimuovi i duplicati e riprova. Nessun giocatore viene importato."
+                        description: "Seleziona la rosa, poi da “Gestisci” scegli “Importa una lista”. Scrivi un giocatore per riga, ad esempio MARIO DI ROSSI: la prima parola è il nome, le successive sono il cognome. Usa solo lettere e un singolo spazio tra le parole, senza righe vuote. Se ci sono giocatori già presenti o ripetuti nella lista, un avviso blocca l’importazione: rimuovi i duplicati e riprova. Nessun giocatore viene importato."
                     )
                 }
 
@@ -43,7 +45,7 @@ struct HelpView: View {
                         iconName: "sportscourt.fill",
                         color: BoardPalette.partite,
                         title: "Organizza una partita",
-                        description: "Seleziona l’annata e tocca “Nuova partita”: la partita appartiene a quella rosa. Aprila per scegliere tipo, data e ora. Indica se giochi in casa o fuori casa e il campo della trasferta."
+                        description: "Seleziona la rosa e tocca “Nuova partita”: la partita appartiene a quella rosa. Nel dettaglio, “Rosa Giocatori” indica la rosa a cui appartiene. Aprila per scegliere tipo, data e ora. Indica se giochi in casa o fuori casa e il campo della trasferta."
                     )
                     HelpRow(
                         iconName: "checkmark.circle.fill",
@@ -64,7 +66,7 @@ struct HelpView: View {
                         iconName: "figure.run",
                         color: BoardPalette.allenamenti,
                         title: "Registra una sessione di allenamento",
-                        description: "Seleziona l’annata e tocca “Nuovo allenamento”: la sessione appartiene a quella rosa. Aprila per impostare data, ora e note."
+                        description: "Seleziona la rosa e tocca “Nuovo allenamento”: la sessione appartiene a quella rosa. Aprila per impostare data, ora e note. Nel dettaglio, “Rosa Giocatori” indica la rosa della sessione."
                     )
                     HelpRow(
                         iconName: "checklist",
@@ -79,7 +81,7 @@ struct HelpView: View {
                         iconName: "trophy.fill",
                         color: BoardPalette.ranking,
                         title: "Consulta la partecipazione",
-                        description: "Seleziona l’annata, poi scegli “Allenamenti” o “Convocazioni” per ordinare i giocatori per presenze o convocazioni. Ogni riga mostra il conteggio e la percentuale sul totale degli eventi della rosa selezionata. Ogni rosa ha una classifica indipendente."
+                        description: "Seleziona la rosa, poi scegli “Allenamenti” o “Convocazioni” per ordinare i giocatori per presenze o convocazioni. Ogni riga mostra il conteggio e la percentuale sul totale degli eventi della rosa selezionata. Ogni rosa ha una classifica indipendente."
                     )
                 }
 
@@ -94,17 +96,18 @@ struct HelpView: View {
                         iconName: "trash.circle.fill",
                         color: .red,
                         title: "Elimina una rosa",
-                        description: "Nella scheda Rose, scegli l’annata e apri “Gestisci” → “Elimina rosa”. Dopo la conferma vengono eliminati l’annata e tutti i suoi giocatori, allenamenti e partite. L’annata scompare da tutti i selettori; le altre rose rimangono intatte. L’operazione non può essere annullata. Se elimini l’ultima rosa, torna la schermata per crearne una nuova."
+                        description: "Nella scheda Rose, scegli la rosa e apri “Gestisci” → “Elimina rosa”. Dopo la conferma vengono eliminati la rosa e tutti i suoi giocatori, allenamenti e partite. La rosa scompare da tutti i selettori; le altre rose rimangono intatte. L’operazione non può essere annullata. Se elimini l’ultima rosa, torna la schermata per crearne una nuova."
                     )
                     HelpRow(
                         iconName: "checkmark.shield.fill",
                         color: .blue,
                         title: "Salvataggio automatico",
-                        description: "Annate, giocatori, partite e allenamenti vengono salvati e restano disponibili alla riapertura dell’app. Anche la scelta dell’annata viene ricordata."
+                        description: "Rose, giocatori, partite e allenamenti vengono salvati e restano disponibili alla riapertura dell’app. Anche la scelta della rosa viene ricordata."
                     )
                 }
             }
-            .listStyle(.insetGrouped)
+            .boardList(BoardPalette.rosa)
+            .listStyle(.plain)
             .navigationTitle("Guida a MisterBoard")
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -118,22 +121,77 @@ private struct HelpRow: View {
     let description: LocalizedStringResource
 
     var body: some View {
-        HStack(alignment: .top, spacing: 15) {
-            Image(systemName: iconName)
-                .foregroundStyle(color)
-                .font(.title2)
-                .frame(width: 30)
-                .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 4) {
+        DisclosureGroup {
+            Text(description)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .lineSpacing(4)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 8)
+                .padding(.bottom, 6)
+        } label: {
+            HStack(spacing: 12) {
+                BoardIcon(symbol: iconName, color: color)
                 Text(title)
                     .font(.headline)
-                Text(description)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            .padding(.vertical, 4)
         }
-        .padding(.vertical, 8)
+        .tint(color)
+        .padding(18)
+        .background(color.opacity(0.10).gradient, in: RoundedRectangle(cornerRadius: 22))
+        .overlay {
+            RoundedRectangle(cornerRadius: 22)
+                .strokeBorder(color.opacity(0.18), lineWidth: 1)
+        }
+        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+        .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
+    }
+}
+
+private struct HelpIntroView: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Image(systemName: "book.closed.fill")
+                .font(.largeTitle)
+                .padding(14)
+                .background(.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 18))
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("La tua squadra,\nsempre organizzata.")
+                    .font(.system(.title, design: .rounded, weight: .bold))
+                Text("Dalla prima rosa alle convocazioni: tutto quello che serve per usare MisterBoard.")
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.9))
+            }
+            .fixedSize(horizontal: false, vertical: true)
+
+            Label("Tocca un argomento per scoprire i dettagli", systemImage: "hand.tap")
+                .font(.footnote)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .foregroundStyle(.white)
+        .padding(24)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            LinearGradient(
+                colors: [
+                    BoardPalette.rosa.mix(with: .black, by: 0.35),
+                    BoardPalette.rosa.mix(with: .black, by: 0.65)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ),
+            in: RoundedRectangle(cornerRadius: 26)
+        )
+        .listRowInsets(EdgeInsets(top: 16, leading: 16, bottom: 20, trailing: 16))
+        .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
     }
 }
 

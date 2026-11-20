@@ -19,6 +19,7 @@ struct AllenamentiView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Allenamento.dataOra, order: .reverse) private var allenamenti: [Allenamento]
+    @Query private var annate: [RosaAnnata]
     @State private var mostraConfermaCancellaTutto = false
     
     var body: some View {
@@ -28,7 +29,7 @@ struct AllenamentiView: View {
 
                 BoardSummaryCard(
                     title: "I tuoi allenamenti",
-                    subtitle: "Sessioni di lavoro della squadra",
+                    subtitle: "Rosa: \(annate.first(where: { $0.id == selezione })?.annata ?? "Non disponibile")",
                     symbol: "figure.run",
                     color: BoardPalette.allenamenti,
                     count: allenamenti.count
@@ -148,6 +149,7 @@ struct DettaglioAllenamentoView: View {
 
     @Bindable var allenamento: Allenamento
     @Query(sort: \Giocatore.cognome) private var rosa: [Giocatore]
+    @Query private var annate: [RosaAnnata]
     
     private var tuttiPresenti: Bool {
         !rosa.isEmpty && allenamento.presenti.count == rosa.count
@@ -155,6 +157,22 @@ struct DettaglioAllenamentoView: View {
     
     var body: some View {
         Form {
+            Section {
+                Label {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Rosa Giocatori")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text(annate.first(where: { $0.id == allenamento.rosaID })?.annata ?? "Non disponibile")
+                            .font(.headline)
+                    }
+                } icon: {
+                    Image(systemName: "person.3.fill")
+                        .foregroundStyle(BoardPalette.allenamenti)
+                }
+                .listRowBackground(BoardPalette.allenamenti.opacity(0.10))
+            }
+
             Section("Dettagli Allenamento") {
                 BoardDateTimePicker(selection: $allenamento.dataOra)
                 TextField("Note (es. Atletica, Partitella...)", text: $allenamento.note)

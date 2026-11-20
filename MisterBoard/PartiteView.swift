@@ -20,6 +20,7 @@ struct PartiteView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Partita.dataOra, order: .reverse) private var partite: [Partita]
+    @Query private var annate: [RosaAnnata]
     @State private var mostraConfermaCancellaTutto = false
     
     var body: some View {
@@ -29,7 +30,7 @@ struct PartiteView: View {
 
                 BoardSummaryCard(
                     title: "Le tue partite",
-                    subtitle: "Tutto inizia qui",
+                    subtitle: "Rosa: \(annate.first(where: { $0.id == selezione })?.annata ?? "Non disponibile")",
                     symbol: "sportscourt.fill",
                     color: BoardPalette.partite,
                     count: partite.count
@@ -183,6 +184,7 @@ struct DettaglioPartitaView: View {
 
     @Bindable var partita: Partita
     @Query(sort: \Giocatore.cognome) private var rosa: [Giocatore]
+    @Query private var annate: [RosaAnnata]
     
     @State private var messaggioDaCondividere: MessaggioCondivisione?
     
@@ -192,6 +194,22 @@ struct DettaglioPartitaView: View {
     
     var body: some View {
         Form {
+            Section {
+                Label {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Rosa Giocatori")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text(annate.first(where: { $0.id == partita.rosaID })?.annata ?? "Non disponibile")
+                            .font(.headline)
+                    }
+                } icon: {
+                    Image(systemName: "person.3.fill")
+                        .foregroundStyle(BoardPalette.partite)
+                }
+                .listRowBackground(BoardPalette.partite.opacity(0.10))
+            }
+
             Section("Dettagli Partita") {
                 Picker("Tipo di partita", selection: $partita.tipo) {
                     Text("TORNEO").tag(TipoPartita.torneo)
