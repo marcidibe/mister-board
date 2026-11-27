@@ -35,8 +35,7 @@ struct ContentView: View {
                 NavigationStack {
                     ScrollView {
                         SelettoreAnnataView(selezione: $selezioneVuota, consenteGestione: true)
-                            .frame(maxWidth: 540)
-                            .frame(maxWidth: .infinity)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(24)
                     }
                     .background(BoardPalette.rosa.opacity(0.045).ignoresSafeArea())
